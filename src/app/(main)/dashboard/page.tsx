@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // เพิ่มบรรทัดนี้
+import { useRouter } from "next/navigation"; 
 import BottomNav from "@/components/layout/BottomNav";
 import { createClient } from "@/lib/supabase/client";
 
@@ -93,7 +93,7 @@ export default function DashboardPage() {
   // Handle Actions - แก้ไขฟังก์ชันนี้
   const handleBookRoom = (roomId: number) => {
     // ไปหน้า Booking แทน alert
-    router.push('/booking');
+    router.push(`/booking/${roomId}`);
   };
 
   const handleQuickAction = (action: string) => {

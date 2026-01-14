@@ -1,44 +1,204 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import BottomNav from "@/components/layout/BottomNav";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const supabase = createClient();
+
+  // --- UI States ---
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Mock user data
+  // --- Modal States (สำหรับเปิด/ปิดหน้าต่างแก้ไข) ---
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // --- Data States ---
+  const [user, setUser] = useState<any>(null); // เก็บข้อมูล Auth User
   const [userData, setUserData] = useState({
-    name: "นายสมศักดิ์ รักเรียน",
-    studentId: "63543206015-6",
-    email: "somsak@ruts.ac.th",
-    phone: "081-234-5678",
+    name: "",
+    studentId: "",
+    email: "",
+    phone: "",
     department: "วิศวกรรมคอมพิวเตอร์",
     role: "นักศึกษา",
-    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDXI_ZA6ZufZYN9XRvG7THCtvcresRVeJwHePv4UeGR0BPmCB0hSVz7S1QDLA_VwjbgC5vMuh_0Q0ZHOqP8kPQdQayFWVJF3wHvJube6AeLAYtmPPy7ZQo8z3r8ZCyLv0qzcIwkmaqv_5vPwe57c1aEW0CLGmofjZ60zz-OAmdBmgjTGai9Mxh2tI_uk_NmHnlkP_9T1vMd6L4tancOwYiDMriL4guExNkgVzxJU_vw0WejVtbqT3wdvFIoooPV4S-EA9RZSZgN4RY"
+    avatar: "/images/student.jpg"
   });
 
-  const handleLogout = () => {
-    if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-      // Implement logout logic here
-      console.log("Logging out...");
-      // window.location.href = "/login";
+  // --- Form States (ข้อมูลที่กำลังพิมพ์แก้ไข) ---
+  const [editForm, setEditForm] = useState({
+    name: "",
+    phone: "",
+    studentId: ""
+  });
+
+  const [passwordForm, setPasswordForm] = useState({
+    newPassword: "",
+    confirmPassword: ""
+  });
+
+  // 1. ฟังก์ชันดึงข้อมูลจาก Supabase
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        
+        // 1.1 เช็ค Login
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.push("/login");
+          return;
+        }
+        setUser(user); // เก็บ user ไว้ใช้ตอน update
+
+        // 1.2 ดึงข้อมูล Profile
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching profile:", error);
+        }
+
+        // 1.3 อัปเดต State
+        if (profile) {
+          const loadedData = {
+            name: profile.full_name || "ไม่ระบุชื่อ",
+            studentId: profile.student_id || "-",
+            email: user.email || "-",
+            phone: profile.phone || "", // ใช้ค่าว่างถ้าไม่มี
+            department: "วิศวกรรมคอมพิวเตอร์",
+            role: profile.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักศึกษา',
+            avatar: profile.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+          };
+          
+          setUserData(loadedData);
+          
+          // เตรียมข้อมูลลงฟอร์มแก้ไขรอไว้เลย
+          setEditForm({
+            name: loadedData.name,
+            phone: loadedData.phone,
+            studentId: loadedData.studentId
+          });
+        }
+
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [router, supabase]);
+
+  // 2. ฟังก์ชันเตรียมข้อมูลก่อนเปิด Modal แก้ไข
+  const handleEditClick = () => {
+    // รีเซ็ตฟอร์มให้ตรงกับข้อมูลปัจจุบัน
+    setEditForm({
+      name: userData.name,
+      phone: userData.phone,
+      studentId: userData.studentId
+    });
+    setShowEditModal(true);
+  };
+
+  // 3. ฟังก์ชันบันทึกข้อมูล (Update Profile)
+  const saveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      // ส่งข้อมูลไปอัปเดตที่ Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editForm.name,
+          phone: editForm.phone,
+          student_id: editForm.studentId
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // อัปเดตหน้าจอทันทีโดยไม่ต้องโหลดใหม่
+      setUserData({ 
+        ...userData, 
+        name: editForm.name,
+        phone: editForm.phone,
+        studentId: editForm.studentId
+      });
+      
+      setShowEditModal(false);
+      alert("บันทึกข้อมูลสำเร็จ!");
+
+    } catch (error: any) {
+      alert("เกิดข้อผิดพลาด: " + error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleEditProfile = () => {
-    setIsEditingProfile(true);
-    console.log("Edit profile clicked");
+  // 4. ฟังก์ชันเปลี่ยนรหัสผ่าน
+  const savePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      alert("รหัสผ่านไม่ตรงกัน");
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      alert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword
+      });
+
+      if (error) throw error;
+
+      alert("เปลี่ยนรหัสผ่านสำเร็จ!");
+      setShowPasswordModal(false);
+      setPasswordForm({ newPassword: "", confirmPassword: "" });
+
+    } catch (error: any) {
+      alert("เปลี่ยนรหัสผ่านไม่สำเร็จ: " + error.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleChangePassword = () => {
-    console.log("Change password clicked");
+  // 5. ฟังก์ชัน Logout
+  const handleLogout = async () => {
+    if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+      await supabase.auth.signOut();
+      router.push("/login");
+    }
   };
 
   const handleViewBookings = () => {
     console.log("View bookings clicked");
   };
+
+  // UI ตอนโหลด
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '10px' }}>
+        <div className="spinner" style={{ border: '4px solid #f3f3f3', borderTop: '4px solid var(--ruts-navy)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite' }}></div>
+        <p style={{ color: '#64748b' }}>กำลังโหลดข้อมูลโปรไฟล์...</p>
+        <style jsx>{` @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">
@@ -61,10 +221,15 @@ export default function ProfilePage() {
         </div>
 
         <div className="profile-hero">
-          <div className="avatar-container" onClick={handleEditProfile}>
+          {/* คลิกที่รูปเพื่อแก้ไขได้ */}
+          <div className="avatar-container" onClick={handleEditClick}>
             <div 
               className="avatar" 
-              style={{ backgroundImage: `url(${userData.avatar})` }}
+              style={{ 
+                backgroundImage: `url(${userData.avatar})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
             ></div>
             <div className="avatar-edit-badge">
               <span className="material-symbols-outlined" style={{ fontSize: '18px', fontWeight: 'bold' }}>
@@ -88,7 +253,7 @@ export default function ProfilePage() {
       {/* Quick Actions */}
       <div className="quick-actions-container">
         <div className="quick-actions">
-          <button className="action-btn" onClick={handleEditProfile}>
+          <button className="action-btn" onClick={handleEditClick}>
             <div className="action-icon-wrapper">
               <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
                 edit_square
@@ -99,7 +264,7 @@ export default function ProfilePage() {
           
           <div className="divider-vertical"></div>
           
-          <button className="action-btn" onClick={handleChangePassword}>
+          <button className="action-btn" onClick={() => setShowPasswordModal(true)}>
             <div className="action-icon-wrapper">
               <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
                 lock_reset
@@ -123,7 +288,6 @@ export default function ProfilePage() {
 
       {/* Main Content */}
       <main className="profile-content">
-        {/* Personal Information */}
         <section className="section">
           <h3 className="section-header">
             <span className="material-symbols-outlined section-icon">person</span>
@@ -134,9 +298,7 @@ export default function ProfilePage() {
             <div className="card-row">
               <div className="card-row-content">
                 <div className="card-icon-wrapper">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    mail
-                  </span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>mail</span>
                 </div>
                 <div className="card-text-wrapper">
                   <span className="card-label">อีเมล</span>
@@ -148,13 +310,11 @@ export default function ProfilePage() {
             <div className="card-row">
               <div className="card-row-content">
                 <div className="card-icon-wrapper">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    call
-                  </span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>call</span>
                 </div>
                 <div className="card-text-wrapper">
                   <span className="card-label">เบอร์โทรศัพท์</span>
-                  <span className="card-value">{userData.phone}</span>
+                  <span className="card-value">{userData.phone || "-"}</span>
                 </div>
               </div>
             </div>
@@ -162,9 +322,7 @@ export default function ProfilePage() {
             <div className="card-row">
               <div className="card-row-content">
                 <div className="card-icon-wrapper">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    school
-                  </span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>school</span>
                 </div>
                 <div className="card-text-wrapper">
                   <span className="card-label">สาขาวิชา</span>
@@ -175,7 +333,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* App Settings */}
+        {/* Settings & Others */}
         <section className="section">
           <h3 className="section-header">
             <span className="material-symbols-outlined section-icon">tune</span>
@@ -186,9 +344,7 @@ export default function ProfilePage() {
             <div className="card-row">
               <div className="card-row-content">
                 <div className="card-icon-wrapper">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    notifications
-                  </span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>notifications</span>
                 </div>
                 <span className="card-value">การแจ้งเตือน</span>
               </div>
@@ -203,29 +359,10 @@ export default function ProfilePage() {
               </label>
             </div>
 
-            <button className="card-row-button">
-              <div className="card-row-content">
-                <div className="card-icon-wrapper">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    language
-                  </span>
-                </div>
-                <span className="card-value">ภาษา</span>
-              </div>
-              <div className="card-row-right">
-                <span className="card-row-right-text">ไทย</span>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                  chevron_right
-                </span>
-              </div>
-            </button>
-
             <div className="card-row">
               <div className="card-row-content">
                 <div className="card-icon-wrapper">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    dark_mode
-                  </span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>dark_mode</span>
                 </div>
                 <span className="card-value">โหมดกลางคืน</span>
               </div>
@@ -253,36 +390,16 @@ export default function ProfilePage() {
             <button className="card-row-button">
               <div className="card-row-content">
                 <div className="card-icon-wrapper">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    help
-                  </span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>help</span>
                 </div>
                 <span className="card-value">ศูนย์ช่วยเหลือ</span>
               </div>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#64748b' }}>
-                chevron_right
-              </span>
-            </button>
-
-            <button className="card-row-button">
-              <div className="card-row-content">
-                <div className="card-icon-wrapper">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    description
-                  </span>
-                </div>
-                <span className="card-value">ข้อกำหนดการใช้งาน</span>
-              </div>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#64748b' }}>
-                chevron_right
-              </span>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#64748b' }}>chevron_right</span>
             </button>
           </div>
 
           <button className="logout-button" onClick={handleLogout}>
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-              logout
-            </span>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
             ออกจากระบบ
           </button>
 
@@ -293,7 +410,98 @@ export default function ProfilePage() {
         </section>
       </main>
 
-      {/* Bottom Navigation */}
+      {/* ================= MODALS SECTION ================= */}
+
+      {/* 1. Modal แก้ไขข้อมูลส่วนตัว */}
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>แก้ไขข้อมูลส่วนตัว</h3>
+              <button onClick={() => setShowEditModal(false)} className="close-btn">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <form onSubmit={saveProfile}>
+              <div className="form-group">
+                <label>ชื่อ-นามสกุล</label>
+                <input 
+                  type="text" 
+                  className="modal-input" 
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>รหัสนักศึกษา</label>
+                <input 
+                  type="text" 
+                  className="modal-input" 
+                  value={editForm.studentId}
+                  onChange={(e) => setEditForm({...editForm, studentId: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>เบอร์โทรศัพท์</label>
+                <input 
+                  type="tel" 
+                  className="modal-input" 
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                  placeholder="08x-xxx-xxxx"
+                />
+              </div>
+              <button type="submit" className="save-btn" disabled={isSaving}>
+                {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Modal เปลี่ยนรหัสผ่าน */}
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>เปลี่ยนรหัสผ่าน</h3>
+              <button onClick={() => setShowPasswordModal(false)} className="close-btn">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <form onSubmit={savePassword}>
+              <div className="form-group">
+                <label>รหัสผ่านใหม่</label>
+                <input 
+                  type="password" 
+                  className="modal-input" 
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="form-group">
+                <label>ยืนยันรหัสผ่านใหม่</label>
+                <input 
+                  type="password" 
+                  className="modal-input" 
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <button type="submit" className="save-btn" disabled={isSaving}>
+                {isSaving ? "กำลังเปลี่ยนรหัส..." : "ยืนยันการเปลี่ยนรหัส"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </div>
   );
