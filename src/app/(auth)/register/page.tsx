@@ -25,7 +25,7 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
 
-    // 1. Validation: เช็คแค่รหัสผ่านตรงกันไหม (ส่วนอีเมลใช้อะไรก็ได้แล้ว)
+    // 1. Validation
     if (formData.password !== formData.confirmPassword) {
       setError("รหัสผ่านไม่ตรงกัน");
       setLoading(false);
@@ -34,27 +34,35 @@ export default function RegisterPage() {
 
     try {
       // 2. สมัครสมาชิกกับ Supabase
+      // เพิ่ม options data ไปด้วยเผื่อ Trigger อยากดึงไปใช้ (Best Practice)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            student_id: formData.studentId
+          }
+        }
       });
 
       if (authError) throw authError;
 
       if (authData.user) {
-        // 3. บันทึก Profile
+        // 3. บันทึก Profile (ใช้ UPSERT แทน INSERT)
+        // เพื่อแก้ปัญหาข้อมูลชนกับ Trigger ที่สร้างให้อัตโนมัติ
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert({
-            id: authData.user.id,
+          .upsert({ 
+            id: authData.user.id, // ต้องระบุ ID เสมอ
             student_id: formData.studentId,
             full_name: formData.fullName,
-            role: 'student' // สมัครเองให้เป็น student ไปก่อน
+            role: 'student'
           });
 
         if (profileError) {
             console.error("Profile Error:", profileError);
-            throw new Error("สร้างบัญชีสำเร็จ แต่บันทึกข้อมูลส่วนตัวไม่ผ่าน");
+            throw new Error("สร้างบัญชีสำเร็จ แต่บันทึกข้อมูลส่วนตัวไม่ผ่าน: " + profileError.message);
         }
 
         alert("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ");
