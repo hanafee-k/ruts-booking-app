@@ -31,67 +31,6 @@
 }
 
 /* =====================================
-   TOP BAR (STICKY HEADER)
-   ===================================== */
-
-.top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(248, 248, 245, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 16px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.btn-circle-back {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-circle-back:hover {
-  background-color: #e2e8f0;
-}
-
-.page-titles h2 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0;
-  color: var(--schedule-text-dark);
-}
-
-.page-titles p {
-  font-size: 0.75rem;
-  color: var(--schedule-text-grey);
-  margin: 0;
-}
-
-.user-profile-pic {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #cbd5e1;
-  border: 2px solid var(--schedule-yellow);
-  overflow: hidden;
-}
-
-/* =====================================
    BANNER CARD (Today's Summary)
    ===================================== */
 

@@ -89,24 +89,8 @@ export default function SchedulePage() {
 
   return (
     <div className="schedule-page">
-      
-      {/* 1. Top Bar */}
-      <div className="top-bar">
-        <div className="top-bar-left">
-          <button onClick={() => router.back()} className="btn-circle-back">
-            <span className="material-symbols-outlined">arrow_back_ios_new</span>
-          </button>
-          <div className="page-titles">
-            <h2>ตารางเวลาการจอง</h2>
-            <p>Computer Engineering</p>
-          </div>
-        </div>
-        <div className="user-profile-pic">
-           <div style={{width:'100%', height:'100%', background:'#cbd5e1', borderRadius:'50%'}}></div>
-        </div>
-      </div>
 
-      {/* 2. Banner */}
+      {/* 1. Banner */}
       <div className="section-container">
         <div className="banner-card">
           <div className="banner-content">
@@ -122,7 +106,7 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* 3. Toggle View */}
+      {/* 2. Toggle View */}
       <div className="section-container">
         <div className="view-toggle">
           <button 
@@ -140,11 +124,12 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* 4. Date Selection */}
+      {/* 3. Date Selection (แก้ใหม่: ใช้ JS สั่งเปิด 100% กดง่ายแน่นอน) */}
       <div className="section-container" style={{marginTop: '16px'}}>
         <div 
-          onClick={() => dateInputRef.current?.showPicker()}
+          onClick={() => dateInputRef.current?.showPicker()} // ✅ สั่งเปิดปฏิทินทันทีที่แตะกล่อง
           style={{
+            position: 'relative',
             background: '#ffffff',
             border: '1px solid #e2e8f0',
             borderRadius: '16px',
@@ -152,11 +137,12 @@ export default function SchedulePage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            cursor: 'pointer',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+            boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+            cursor: 'pointer' // ให้รู้ว่ากดได้
           }}
         >
-           <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
+           {/* ส่วนแสดงผล: ใส่ pointerEvents: 'none' เพื่อให้นิ้วทะลุไปกดกล่องแม่ */}
+           <div style={{display:'flex', alignItems:'center', gap:'12px', pointerEvents: 'none'}}>
               <div style={{
                   width:'40px', height:'40px', 
                   background:'#f1f5f9', borderRadius:'10px', 
@@ -173,12 +159,21 @@ export default function SchedulePage() {
               </div>
            </div>
            
-           <span className="material-symbols-outlined" style={{color:'#94a3b8'}}>expand_more</span>
+           <span className="material-symbols-outlined" style={{color:'#94a3b8', pointerEvents: 'none'}}>expand_more</span>
 
+           {/* Input ซ่อนไว้ข้างหลังเฉยๆ เพื่อรอคำสั่ง showPicker */}
            <input 
               ref={dateInputRef}
               type="date"
-              style={{position:'absolute', opacity:0, pointerEvents:'none', height:0, width:0}}
+              style={{
+                position: 'absolute',
+                opacity: 0,
+                bottom: 0,
+                left: 0,
+                width: 1,  // ทำให้เล็กจนไม่กวน layout
+                height: 1,
+                pointerEvents: 'none' // ห้ามกดโดนตัว input เอง (เราจะใช้กล่องแม่กดแทน)
+              }}
               value={formatDateForInput(selectedDate)}
               onChange={(e) => {
                  if(e.target.value) {
@@ -190,7 +185,7 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* 5. Timeline */}
+      {/* 4. Timeline */}
       <div className="timeline-container">
         {loading ? (
            <p className="loading-text">กำลังโหลดข้อมูล...</p>
