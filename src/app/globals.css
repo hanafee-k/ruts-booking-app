@@ -426,13 +426,6 @@ img {
   border: 1px solid rgb(243, 244, 246);
 }
 
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-  .login-form-card {
-    background: #151b2b;
-    border-color: rgb(31, 41, 55);
-  }
-}
 
 /* Form */
 .login-form {
@@ -1560,27 +1553,6 @@ img {
   }
 }
 
-/* === Dark Mode (Optional) === */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-light: #020B1C;
-    --surface-light: #0D1B2E;
-    --text-main: #FFFFFF;
-    --text-sub: #94A3B8;
-    --border-light: #1E293B;
-  }
-
-  .user-name,
-  .section-title,
-  .happening-room-name,
-  .room-name {
-    color: white;
-  }
-
-  .notification-btn {
-    color: white;
-  }
-}
 
 /* ========================================
    PROFILE COMPONENTS
@@ -2660,89 +2632,7 @@ img {
   }
 }
 
-/* Dark mode (optional) */
-@media (prefers-color-scheme: dark) {
-  .booking-page {
-    background-color: var(--surface-dark);
-  }
 
-  .booking-header {
-    background-color: rgba(21, 30, 46, 0.95);
-    border-bottom-color: var(--border-dark);
-  }
-
-  .btn-back {
-    color: var(--text-primary-dark);
-  }
-
-  .btn-back:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .booking-title {
-    color: var(--text-primary-dark);
-  }
-
-  .room-card {
-    background-color: var(--surface-dark);
-    border-color: var(--border-dark);
-  }
-
-  .room-name {
-    color: var(--text-primary-dark);
-  }
-
-  .room-location {
-    color: var(--text-secondary-dark);
-  }
-
-  .section-header h3 {
-    color: var(--text-primary-dark);
-  }
-
-  .form-label {
-    color: var(--text-primary-dark);
-  }
-
-  .form-input,
-  .form-select,
-  .form-textarea {
-    background-color: var(--background-dark);
-    border-color: var(--border-dark);
-    color: var(--text-primary-dark);
-  }
-
-  .counter-wrapper {
-    background-color: var(--background-dark);
-    border-color: var(--border-dark);
-  }
-
-  .counter-value {
-    color: var(--text-primary-dark);
-  }
-
-  .toggle-field {
-    background-color: var(--background-dark);
-    border-color: var(--border-dark);
-  }
-
-  .toggle-title {
-    color: var(--text-primary-dark);
-  }
-
-  .toggle-subtitle {
-    color: var(--text-secondary-dark);
-  }
-
-  .booking-footer {
-    background-color: var(--surface-dark);
-    border-top-color: var(--border-dark);
-  }
-
-  .summary-value {
-    color: white;
-  }
-}
 
 /* ========================================
    Modal COMPONENT
@@ -3713,4 +3603,104 @@ h4 {
   font-size: 48px;
   margin-bottom: 8px;
   display: block;
+}
+
+/* =================================================================
+   🔥 GLOBAL APP-SHELL FIX (วางไว้ล่างสุดของไฟล์ CSS)
+   บังคับให้ทุกหน้ามีขนาดเท่ามือถือ และจัดกึ่งกลางจอเสมอ
+   ================================================================= */
+
+/* 1. จัดฉากหลังของ Browser (เมื่อเปิดบนคอม) ให้สีเข้มขึ้น เพื่อให้ตัวแอปเด่นขึ้น */
+body {
+  background-color: #f1f5f9; /* สีพื้นหลังจอคอม (เทาอ่อน) */
+  display: flex;
+  justify-content: center; /* จัดแอปให้อยู่ตรงกลาง */
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* 2. รวบรวม Class ของทุกหน้ามาบังคับขนาด */
+.login-container,
+.dashboard-container,
+.profile-page,
+.booking-page,
+.schedule-page,
+.search-page,
+.main-container {
+  width: 100%;
+  max-width: 480px !important; /* ✅ ล็อคความกว้างเท่ากันทุกหน้า (มาตรฐานมือถือ) */
+  min-height: 100dvh; /* ใช้ dvh เพื่อแก้ปัญหา Address bar ในมือถือ */
+  margin: 0 auto; /* จัดกึ่งกลาง */
+  background-color: var(--bg-light, #ffffff); /* สีพื้นหลังแอป */
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1); /* เงาด้านข้างเวลาดูบนคอม */
+  position: relative;
+  overflow-x: hidden; /* ห้ามเลื่อนซ้ายขวา */
+}
+
+/* 3. แก้ไข Header/Footer ที่เป็น Fixed/Sticky ให้ไม่ล้นจอคอม */
+.bottom-nav,
+.sticky-header,
+.booking-header,
+.booking-footer,
+.dashboard-header,
+.top-bar,
+.fab-add {
+  max-width: 480px !important; /* ความกว้างต้องไม่เกินตัวแอป */
+  width: 100%;
+  left: 50% !important; /* ดันไปเริ่มที่กึ่งกลางจอ */
+  transform: translateX(-50%) !important; /* ขยับกลับมาให้ตรงกลางเป๊ะ */
+  right: auto !important;
+}
+
+/* 4. แก้ไขปุ่ม FAB (ปุ่มบวก) ให้ตำแหน่งเป๊ะ */
+.fab-add {
+  width: 56px; /* คืนค่าความกว้างปุ่ม */
+  /* ตำแหน่งปุ่มบวก ต้องคำนวณจากขอบขวาของคอนเทนเนอร์ 480px */
+  /* สูตร: 50% ของจอ + ครึ่งหนึ่งของความกว้างแอป (240px) - ระยะห่าง (24px) */
+  left: calc(50% + 240px - 24px - 56px) !important; 
+  transform: none !important;
+  bottom: 100px;
+}
+
+/* 5. แก้ไขหน้า Login เฉพาะกิจ */
+.login-hero {
+  width: 100%;
+}
+.login-form-wrapper {
+  max-width: 100% !important; /* ให้เต็มกรอบ 480px */
+}
+
+/* 6. แก้ไขหน้า Schedule (Timeline) */
+.schedule-page {
+  background-color: var(--bg-color);
+}
+
+/* 7. แก้ไขหน้า Search */
+.search-content {
+  max-width: 100% !important;
+}
+
+/* --- Responsive (สำหรับมือถือจริงๆ) --- */
+@media (max-width: 480px) {
+  /* เมื่อจอเล็กกว่า 480px (มือถือจริง) ให้เต็มจอปกติ */
+  body {
+    background-color: var(--bg-light); /* กลับไปใช้สีพื้นหลังปกติ */
+  }
+  
+  .login-container,
+  .dashboard-container,
+  .profile-page,
+  .booking-page,
+  .schedule-page,
+  .search-page,
+  .main-container {
+    box-shadow: none; /* เอากรอบเงาออก */
+    min-height: 100vh;
+  }
+
+  .fab-add {
+    left: auto !important;
+    right: 24px !important;
+    transform: none !important;
+  }
 }
