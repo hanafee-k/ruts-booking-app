@@ -1,293 +1,278 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation"; 
-import BottomNav from "@/components/layout/BottomNav";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import "./dashboard.css";
 
-// Types
-interface Room {
-  id: number;
-  name: string;
-  capacity: number;
-  type: string;
-  availableUntil: string;
-  status: "available" | "limited";
-  image: string;
-}
-
+// Interface สำหรับข้อมูลการจอง
 interface Booking {
-  id: number;
-  room: string;
-  date: string;
-  status: "completed" | "cancelled";
-  icon: string;
+  id: string;
+  room_name: string;
+  start_time: string;
+  end_time: string;
+  purpose: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
 }
-
-// ข้อมูล Mock
-const availableRooms: Room[] = [
-  {
-    id: 1,
-    name: "ห้อง 301",
-    capacity: 40,
-    type: "ห้องบรรยาย",
-    availableUntil: "16:00",
-    status: "available",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCGC4KUyunBfd7HbYzIagNhEKWQc_ya_105ToDFLSpp6d1vwidHGYSBmvlfdpaJl-EDOfUcthPQMvBTgQlfgeuRUlqFnH10mNKNHFXG7g9r1vo1RDEgR5uA-Q2Jb56mPmygS38DjxZtzrNxIPi-8qEPU7LXx-cyA78Z3DdpRwjV6HLxahW6EjGJarCxApwAaogPa1VUeO21nICJ6oP9KYvMzFtLmdA8gXn4CRrHvK0s0dwdqipoGHiWHelp9WUyhWLm2dASREzuKzE"
-  },
-  {
-    id: 2,
-    name: "ห้อง 205",
-    capacity: 25,
-    type: "ห้องปฏิบัติการคอมพิวเตอร์",
-    availableUntil: "15:30",
-    status: "available",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB6mnTIydBj81qY8WLr-OguMBDE621cWRL_tAxEiLi0z5hl5e4z9tg5zkJysEW-UhrG49afQ0k8cNtJcqTVzgXM9Iw1f8--coZdhQWbuDsjsahd31tx26qg2lcbO32BFHU8f5PmCDXXTHLfcUgvlu04uCvTXRenDesjU9gSYzDYdYgwcnIpaOyIHWEu9DBA0IR4N0pNQ7rhz98oBsbmEyECEuTHv020vnHqvtr3-gjN4N5XPfgfOb0rXXIBzLgoWCQhs4kJ4kk1FBo"
-  },
-  {
-    id: 3,
-    name: "ห้อง 101",
-    capacity: 10,
-    type: "ห้องประชุม",
-    availableUntil: "14:00",
-    status: "limited",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuATGq76jaK7ZX25nPs_jyEnsmUBEep4VZT4NVF_zv7hZQrAwoaQA8u6Vf30nnqVxu4sp3xcrLHgLnyV3rUWLEgvl5B4xUIj00fxWvPm3KA6dCJOqeyfv43C_ivQL8qNk4Zv84vGAHoYeH_Squ2NuFgg10toG_OUYyB1fUt1MEWwEnW0SpONVR4bsa2O1csIqIKMsRy62qKbtxdn6bVGettDa1afJ_ZgTMBcUQlRA8B6eO2NCeHTGTWdewEvvSjFbkFjdziDqnKbKOI"
-  }
-];
-
-const bookingHistory: Booking[] = [
-  {
-    id: 1,
-    room: "ห้อง 301",
-    date: "เมื่อวาน, 10:00 - 12:00",
-    status: "completed",
-    icon: "done"
-  },
-  {
-    id: 2,
-    room: "ห้อง 205 (ห้องแล็บ)",
-    date: "จันทร์, 14:00 - 16:00",
-    status: "cancelled",
-    icon: "close"
-  }
-];
-
-const currentBooking = {
-  room: "ห้อง 402: โครงสร้างข้อมูล",
-  building: "อาคาร 4 • ชั้น 4",
-  time: "13:00 - 15:00",
-  remaining: "เหลืออีก 1 ชม. 30 นาที",
-  image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAKQo9tOI8mI-TsK8S7gAIE8_n-SWMZ2H3-WZYQO4b6AO8gVRvG81hVUDUCCv2IlYwPu5VWmQDL2iy7STScBrEE33sFGG2aaKR11Jn2sOjJECcmABVlCFG7R9T5d_7gIJ-cL8LQRA1I0YJ_ixjYQ2LmtYoWEqGJ1LMM6mQPrQ"
-};
 
 export default function DashboardPage() {
-  const router = useRouter(); // เพิ่มบรรทัดนี้
-  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+  const supabase = createClient();
+  const [loading, setLoading] = useState(true);
+  
+  // --- Data States ---
+  const [userData, setUserData] = useState({
+    name: "กำลังโหลด...",
+    studentId: "",
+    department: "วิศวกรรมคอมพิวเตอร์",
+    avatar: ""
+  });
 
-  // Filter ห้องตามคำค้นหา
-  const filteredRooms = availableRooms.filter(room =>
-    room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    room.type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
+  const [nextClass, setNextClass] = useState<Booking | null>(null);
 
-  // Handle Actions - แก้ไขฟังก์ชันนี้
-  const handleBookRoom = (roomId: number) => {
-    // ไปหน้า Booking แทน alert
-    router.push(`/booking/${roomId}`);
+  // วันที่ปัจจุบันแบบไทย
+  const today = new Date().toLocaleDateString('th-TH', { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // 1. เช็ค Login
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.push("/login");
+          return;
+        }
+
+        // 2. ดึง Profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profile) {
+          setUserData({
+            name: profile.full_name || "นักศึกษา",
+            studentId: profile.student_id || "-",
+            department: "วิศวกรรมคอมพิวเตอร์",
+            avatar: profile.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+          });
+        }
+
+        // 3. ดึงข้อมูลการจอง (Upcoming Bookings)
+        // สมมติว่ามีตาราง 'bookings'
+        const now = new Date().toISOString();
+        const { data: bookingsData } = await supabase
+          .from('bookings') // ⚠️ ต้องมีตารางนี้ใน Supabase
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('start_time', now) // เอาเฉพาะเวลาในอนาคต
+          .neq('status', 'cancelled') // ไม่เอาที่ยกเลิก
+          .order('start_time', { ascending: true })
+          .limit(5);
+
+        if (bookingsData && bookingsData.length > 0) {
+          setUpcomingBookings(bookingsData as Booking[]);
+          // สมมติว่าการจองที่ใกล้ที่สุดคือ Next Class/Agenda
+          setNextClass(bookingsData[0] as Booking); 
+        }
+
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [router, supabase]);
+
+  // --- Helper Functions ---
+
+  // แปลงวันที่สำหรับกล่องวันที่ (เช่น 24 ต.ค.)
+  const formatDateBox = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('th-TH', { month: 'short' });
+    return { day, month };
   };
 
-  const handleQuickAction = (action: string) => {
-    alert(`คุณกด: ${action}`);
+  // แปลงเวลา (เช่น 13:30 - 15:30)
+  const formatTimeRange = (start: string, end: string) => {
+    const s = new Date(start).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    const e = new Date(end).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    return `${s} - ${e}`;
   };
+
+  // นำทาง
+  const navigateTo = (path: string) => {
+    router.push(path);
+  };
+
+  if (loading) {
+    return <div className="dashboard-page" style={{display:'flex', justifyContent:'center', alignItems:'center', paddingTop:'100px'}}>กำลังโหลด...</div>;
+  }
 
   return (
-    <div className="dashboard-container">
-      {/* Header */}
+    <div className="dashboard-page">
       
-      <header className="dashboard-header">
-        <div className="header-user-info">
-          <div className="user-avatar-wrapper">
-            <div 
-              className="user-avatar"
-              style={{
-                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuCDcCksSmIXuso_J_V_3HbWG9d9iZXDV960HOM1VN-sHVISOtrZxGl-4aol77fDNNNFoDGRA9uRAT7npayyQiPiWwAVqkKylEdGprt-e5lE50JEZeolayzmauH6R3MHl_Pfr0jz78yhCHTwfh5noo7YCQn-r8XnMP0Yl_6c2_QiLG5K22-ciCBfHsDTpUkbHApF9bpGZ64V9k_jl6TYOSbB2GzjB_LZu9R3vCHsHKPVImOU3R6Z4SZho2X7tFQObbW9WQZ2ag-hqYk")`
-              }}
-            />
-            <div className="user-status-dot" />
+      {/* 1. Sticky Header */}
+      <header className="dash-header">
+        <div className="dash-header-left">
+          <div className="brand-logo">
+            <span className="material-symbols-outlined">school</span>
           </div>
-          <div className="user-text">
-            <h1 className="user-subtitle">คณะวิศวกรรมศาสตร์ มทร.ศรีวิชัย</h1>
-            <p className="user-name">สวัสดี, นักศึกษา</p>
+          <div className="brand-text">
+            <h2>Academic RUTS</h2>
+            <p>คณะวิศวกรรมศาสตร์</p>
           </div>
         </div>
-        <button className="notification-btn" onClick={() => handleQuickAction("การแจ้งเตือน")}>
+        <button className="notification-btn" onClick={() => alert("ยังไม่มีการแจ้งเตือนใหม่")}>
           <span className="material-symbols-outlined">notifications</span>
         </button>
       </header>
 
-      {/* Main Content */}
-      <main className="dashboard-main">
-        {/* Search Bar */}
-        <div className="search-container">
-          <span className="search-icon material-symbols-outlined">search</span>
-          <input
-            type="text"
-            className="search-input"
-            placeholder="ค้นหาห้องหรืออาคาร..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      {/* 2. Profile Section */}
+      <section className="profile-section">
+        <div className="profile-avatar-wrapper">
+          <div 
+            className="profile-avatar" 
+            style={{ backgroundImage: `url(${userData.avatar})` }}
+          ></div>
+          <div className="status-dot"></div>
         </div>
+        <div className="profile-info">
+          <p className="welcome-text">ยินดีต้อนรับ,</p>
+          <h1 className="user-fullname">{userData.name}</h1>
+          <span className="dept-badge">{userData.department}</span>
+        </div>
+      </section>
 
-        {/* Quick Actions */}
-        <section className="section">
-          <div className="section-header">
-            <h2 className="section-title">เมนูด่วน</h2>
-          </div>
-          <div className="quick-actions-grid">
-            <button className="quick-action-btn" onClick={() => handleQuickAction("ค้นหาห้อง")}>
-              <div className="quick-action-icon quick-action-icon-blue">
-                <span className="material-symbols-outlined">search_activity</span>
-              </div>
-              <span className="quick-action-label">ค้นหาห้อง</span>
-            </button>
-            <button className="quick-action-btn" onClick={() => handleQuickAction("การจองของฉัน")}>
-              <div className="quick-action-icon quick-action-icon-gold">
-                <span className="material-symbols-outlined">calendar_month</span>
-              </div>
-              <span className="quick-action-label">การจองของฉัน</span>
-            </button>
-            <button className="quick-action-btn" onClick={() => handleQuickAction("เช็คอิน")}>
-              <div className="quick-action-icon quick-action-icon-lightblue">
-                <span className="material-symbols-outlined">qr_code_scanner</span>
-              </div>
-              <span className="quick-action-label">เช็คอิน</span>
-            </button>
-            <button className="quick-action-btn" onClick={() => handleQuickAction("แจ้งปัญหา")}>
-              <div className="quick-action-icon quick-action-icon-red">
-                <span className="material-symbols-outlined">report_problem</span>
-              </div>
-              <span className="quick-action-label">แจ้งปัญหา</span>
-            </button>
-          </div>
-        </section>
+      {/* 3. Today's Agenda (ใช้ Booking ล่าสุดมาแสดงแทน Agenda) */}
+      <div className="section-title-row">
+        <h2 className="section-title">กำหนดการวันนี้</h2>
+        <span className="date-label">{today}</span>
+      </div>
 
-        {/* Happening Now */}
-        <section className="section">
-          <div className="section-header">
-            <h2 className="section-title">กำลังใช้งาน</h2>
-            <span className="status-badge status-badge-checking">
-              <span className="status-dot" />
-              กำลังเช็คอิน...
-            </span>
-          </div>
-          <div className="happening-card">
-            <div className="happening-card-decoration" />
-            <div className="happening-card-content">
-              <div 
-                className="happening-card-image"
-                style={{ backgroundImage: `url("${currentBooking.image}")` }}
-              />
-              <div className="happening-card-details">
-                <h3 className="happening-room-name">{currentBooking.room}</h3>
-                <p className="happening-building">{currentBooking.building}</p>
-                <div className="happening-time-info">
-                  <span className="material-symbols-outlined">schedule</span>
-                  <span className="happening-time">{currentBooking.time}</span>
-                  <span className="happening-remaining">{currentBooking.remaining}</span>
+      <section className="agenda-card">
+        {nextClass ? (
+          <>
+            <div 
+              className="agenda-image"
+              style={{ backgroundImage: `url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')` }}
+            >
+               <span className="status-badge-ongoing">กำลังมาถึง</span>
+            </div>
+            
+            <div className="agenda-content">
+              <div>
+                <p className="class-time">เวลา • {formatTimeRange(nextClass.start_time, nextClass.end_time)}</p>
+                <h3 className="class-name">{nextClass.room_name}</h3>
+                <div className="class-location">
+                  <span className="material-symbols-outlined" style={{fontSize: '18px'}}>event_note</span>
+                  <span>{nextClass.purpose || "ไม่มีรายละเอียด"}</span>
                 </div>
+              </div>
+              
+              <div className="agenda-footer">
+                <div className="attendees">
+                   <div className="attendee-avatar" style={{backgroundImage: `url(${userData.avatar})`, backgroundSize:'cover'}}></div>
+                   <div className="attendee-avatar" style={{backgroundColor: '#6b7280', color: 'white'}}>+</div>
+                </div>
+                <button className="view-btn" onClick={() => navigateTo('/history')}>ดูรายละเอียด</button>
               </div>
             </div>
+          </>
+        ) : (
+          /* กรณีไม่มี Agenda */
+          <div style={{padding: '2rem', textAlign: 'center', color: '#ccc'}}>
+             <span className="material-symbols-outlined" style={{fontSize: '48px', marginBottom: '10px'}}>event_busy</span>
+             <p>ไม่มีรายการจองหรือเรียนเร็วๆ นี้</p>
+             <button className="view-btn" style={{marginTop:'10px'}} onClick={() => navigateTo('/booking')}>จองห้องเลย</button>
           </div>
-        </section>
+        )}
+      </section>
 
-        {/* Available Now */}
-        <section className="section">
-          <div className="section-header">
-            <h2 className="section-title">ห้องว่าง</h2>
-            <button className="see-all-link" onClick={() => handleQuickAction("ดูทั้งหมด")}>
-              ดูทั้งหมด
+      {/* 4. Quick Actions (ทำงานได้จริง) */}
+      <section style={{ padding: '0 1rem', marginTop: '1.5rem' }}>
+        <h3 className="section-title" style={{ marginBottom: '1rem' }}>เมนูลัด</h3>
+        <div className="quick-actions-grid">
+          
+          <div className="qa-item" onClick={() => navigateTo('/search')}>
+            <button className="qa-btn">
+              <span className="material-symbols-outlined filled" style={{fontVariationSettings: "'FILL' 1"}}>add_circle</span>
             </button>
+            <span className="qa-label">จองห้อง</span>
           </div>
-          <div className="rooms-scroll-container">
-            {filteredRooms.length > 0 ? (
-              filteredRooms.map((room) => (
-                <div 
-                  key={room.id} 
-                  className="room-card"
-                  style={{ cursor: 'pointer' }} // เพิ่มบรรทัดนี้
-                  onClick={() => handleBookRoom(room.id)} // เพิ่มบรรทัดนี้
-                >
-                  <div 
-                    className="room-image"
-                    style={{ backgroundImage: `url("${room.image}")` }}
-                  >
-                    <span className={`room-status-badge ${room.status === "available" ? "status-available" : "status-limited"}`}>
-                      {room.status === "available" ? "ว่าง" : "จำกัด"}
-                    </span>
-                  </div>
-                  <div className="room-details">
-                    <div className="room-header">
-                      <h3 className="room-name">{room.name}</h3>
-                      <div className="room-capacity">
-                        <span className="material-symbols-outlined">group</span>
-                        <span>{room.capacity}</span>
-                      </div>
-                    </div>
-                    <div className="room-info">
-                      <span>ว่างจนถึง {room.availableUntil} น.</span>
-                      <div className="room-info-dot" />
-                      <span>{room.type}</span>
-                    </div>
-                    <button 
-                      className="room-book-btn"
-                      onClick={(e) => {
-                        e.stopPropagation(); // ป้องกันไม่ให้ trigger card click
-                        handleBookRoom(room.id);
-                      }}
-                    >
-                      จองห้อง
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="no-results">
-                <span className="material-symbols-outlined">search_off</span>
-                <p>ไม่พบห้องที่ค้นหา</p>
-              </div>
-            )}
-          </div>
-        </section>
 
-        {/* Booking History */}
-        <section className="section">
-          <div className="section-header">
-            <h2 className="section-title">ประวัติการจอง</h2>
+          <div className="qa-item" onClick={() => navigateTo('/schedule')}>
+            <button className="qa-btn">
+              <span className="material-symbols-outlined filled" style={{fontVariationSettings: "'FILL' 1"}}>calendar_month</span>
+            </button>
+            <span className="qa-label">ตารางเรียน</span>
           </div>
-          <div className="booking-history-container">
-            {bookingHistory.map((booking) => (
-              <div key={booking.id} className="booking-history-item">
-                <div className="booking-history-left">
-                  <div className={`booking-history-icon ${booking.status === "completed" ? "icon-completed" : "icon-cancelled"}`}>
-                    <span className="material-symbols-outlined">{booking.icon}</span>
-                  </div>
-                  <div className="booking-history-text">
-                    <p className="booking-room-name">{booking.room}</p>
-                    <p className="booking-date">{booking.date}</p>
-                  </div>
-                </div>
-                <span className={`booking-status-badge ${booking.status === "completed" ? "status-completed" : "status-cancelled"}`}>
-                  {booking.status === "completed" ? "เสร็จสิ้น" : "ยกเลิก"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </main>
 
-      {/* Bottom Navigation - ใช้ Component */}
-      <BottomNav onQuickAction={handleQuickAction} />
+          <div className="qa-item" onClick={() => navigateTo('/history')}>
+            <button className="qa-btn">
+              <span className="material-symbols-outlined filled" style={{fontVariationSettings: "'FILL' 1"}}>history</span>
+            </button>
+            <span className="qa-label">ประวัติ</span>
+          </div>
+
+          <div className="qa-item" onClick={() => alert("ระบบแผนที่กำลังพัฒนา")}>
+            <button className="qa-btn">
+              <span className="material-symbols-outlined filled" style={{fontVariationSettings: "'FILL' 1"}}>map</span>
+            </button>
+            <span className="qa-label">แผนที่</span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 5. Upcoming Bookings (เชื่อม DB) */}
+      <section style={{ marginTop: '1.5rem' }}>
+        <div className="section-title-row">
+           <h3 className="section-title">การจองเร็วๆ นี้</h3>
+           <button className="see-all-btn" onClick={() => navigateTo('/history')}>ดูทั้งหมด</button>
+        </div>
+        
+        <div className="upcoming-list">
+           {upcomingBookings.length > 0 ? (
+             upcomingBookings.map((booking) => {
+               const { day, month } = formatDateBox(booking.start_time);
+               return (
+                 <div className="booking-item" key={booking.id}>
+                    <div className="date-box" style={booking.status === 'pending' ? {color: 'rgba(244, 209, 37, 0.8)'} : {}}>
+                       <span className="date-num">{day}</span>
+                       <span className="date-month">{month}</span>
+                    </div>
+                    <div className="booking-info">
+                       <h4 className="booking-title">{booking.room_name}</h4>
+                       <p className="booking-time">{formatTimeRange(booking.start_time, booking.end_time)} • {booking.purpose}</p>
+                    </div>
+                    <div className="booking-status">
+                       {booking.status === 'confirmed' && <span className="status-tag confirmed">อนุมัติ</span>}
+                       {booking.status === 'pending' && <span className="status-tag pending">รออนุมัติ</span>}
+                       <span className="material-symbols-outlined" style={{color:'#9ca3af'}}>chevron_right</span>
+                    </div>
+                 </div>
+               );
+             })
+           ) : (
+             <div className="no-results" style={{padding: '1rem'}}>
+               <p>ไม่มีรายการจองเร็วๆ นี้</p>
+             </div>
+           )}
+        </div>
+      </section>
+
     </div>
   );
 }

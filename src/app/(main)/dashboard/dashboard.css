@@ -1,0 +1,390 @@
+/* src/app/(main)/dashboard/dashboard.css */
+
+/* --- Variables เฉพาะหน้า Dashboard --- */
+:root {
+  --dash-bg: #f8f8f5;
+  --dash-card-bg: #ffffff;
+  --dash-text-main: #1e1e1e;
+  --dash-text-sub: #6b7280;
+  --dash-primary: #f4d125; /* สีเหลืองตามแบบ */
+  --dash-accent-dark: #221f10; /* สีพื้นหลังเข้มของ Agenda */
+}
+
+/* Dark Mode Support (ถ้าโปรเจกต์มี) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dash-bg: #1e1e1e;
+    --dash-card-bg: #2d2d2d;
+    --dash-text-main: #ffffff;
+    --dash-text-sub: #9ca3af;
+  }
+}
+
+.dashboard-page {
+  background-color: var(--dash-bg);
+  min-height: 100vh;
+  padding-bottom: 100px; /* เว้นที่ให้ BottomNav */
+  font-family: 'Space Grotesk', 'Noto Sans Thai', sans-serif;
+  color: var(--dash-text-main);
+}
+
+/* --- Sticky Header --- */
+.dash-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba(248, 248, 245, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 1rem;
+  padding-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.dash-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  background-color: var(--dash-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #221f10;
+}
+
+.brand-text h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.brand-text p {
+  font-size: 0.75rem;
+  color: var(--dash-text-sub);
+}
+
+.notification-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* --- Profile Section --- */
+.profile-section {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid var(--dash-primary);
+  background-color: #ddd;
+}
+
+.status-dot {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  background-color: #22c55e;
+  border: 3px solid var(--dash-bg);
+  border-radius: 50%;
+}
+
+.profile-info p {
+  line-height: 1.2;
+}
+
+.welcome-text {
+  font-size: 0.875rem;
+  color: var(--dash-text-sub);
+  font-weight: 500;
+}
+
+.user-fullname {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.dept-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #856404; /* สีเหลืองเข้มให้อ่านง่าย */
+  background-color: rgba(244, 209, 37, 0.2);
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-top: 6px;
+}
+
+/* --- Agenda Card --- */
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.date-label {
+  color: #b49302; /* สีทองเข้ม */
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.agenda-card {
+  margin: 0 1rem;
+  background-color: var(--dash-accent-dark);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  color: white;
+  position: relative;
+}
+
+.agenda-image {
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.status-badge-ongoing {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: rgba(244, 209, 37, 0.2);
+  color: var(--dash-primary);
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid rgba(244, 209, 37, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+.agenda-content {
+  padding: 1.25rem;
+}
+
+.class-time {
+  color: var(--dash-primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.class-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+.class-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #d1d5db;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+.agenda-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.attendees {
+  display: flex;
+  align-items: center;
+}
+
+.attendee-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--dash-accent-dark);
+  background-color: #9ca3af;
+  margin-left: -8px;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.attendee-avatar:first-child { margin-left: 0; }
+
+.view-btn {
+  background-color: var(--dash-primary);
+  color: var(--dash-accent-dark);
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(244, 209, 37, 0.2);
+  transition: transform 0.2s;
+}
+.view-btn:active { transform: scale(0.96); }
+
+/* --- Quick Actions --- */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 0 1rem;
+  margin-top: 0.5rem;
+}
+
+.qa-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.qa-btn {
+  width: 64px;
+  height: 64px;
+  background-color: white;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dash-primary); /* สีไอคอนเหลือง */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.qa-btn:active {
+  background-color: rgba(244, 209, 37, 0.1);
+}
+
+.qa-btn .material-symbols-outlined {
+  font-size: 28px;
+}
+
+.qa-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dash-text-sub);
+  text-align: center;
+}
+
+/* --- Upcoming List --- */
+.upcoming-list {
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booking-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.booking-item:active { transform: scale(0.98); }
+
+.date-box {
+  width: 48px;
+  height: 48px;
+  background-color: var(--dash-accent-dark);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--dash-primary);
+  flex-shrink: 0;
+}
+
+.date-num { font-size: 14px; font-weight: 800; line-height: 1; }
+.date-month { font-size: 10px; font-weight: 600; text-transform: uppercase; }
+
+.booking-info { flex: 1; }
+.booking-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
+.booking-time { font-size: 0.75rem; color: var(--dash-text-sub); }
+
+.booking-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.status-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.status-tag.confirmed {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.status-tag.pending {
+  background-color: rgba(244, 209, 37, 0.15);
+  color: #b49302;
+}
+
+.see-all-btn {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #b49302;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

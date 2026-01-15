@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import "./BottomNav.css";
 
 interface BottomNavProps {
   onQuickAction?: (action: string) => void;

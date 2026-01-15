@@ -1,0 +1,718 @@
+/* ========================================
+   PROFILE PAGE STYLES
+   
+   📝 คำแนะนำ:
+   - Import ไฟล์นี้ใน page.tsx: import "./profile.css"
+   - ตั้งชื่อคลาสด้วย prefix "profile-" เพื่อป้องกันชื่อซ้ำ
+   - Variables ที่ใช้ถูกประกาศใน globals.css แล้ว
+   ======================================== */
+
+.profile-page {
+  min-height: 100vh;
+  background: var(--bg-light);
+  padding-bottom: 6rem;
+}
+
+/* =====================================
+   HEADER SECTION
+   ===================================== */
+
+.profile-header {
+  background: linear-gradient(135deg, var(--ruts-navy) 0%, #1a4494 100%);
+  padding: 3rem 1.5rem 4rem;
+  border-radius: 0 0 2.5rem 2.5rem;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.header-blob-1 {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 16rem;
+  height: 16rem;
+  background: white;
+  border-radius: 50%;
+  filter: blur(60px);
+  transform: translate(25%, -50%);
+  mix-blend-mode: overlay;
+}
+
+.header-blob-2 {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 12rem;
+  height: 12rem;
+  background: var(--ruts-gold);
+  border-radius: 50%;
+  filter: blur(60px);
+  transform: translate(-25%, 25%);
+  mix-blend-mode: overlay;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 10;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+/* =====================================
+   PROFILE HERO (Avatar & User Info)
+   ===================================== */
+
+.profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+  color: white;
+}
+
+.avatar-container {
+  position: relative;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 50%;
+  border: 4px solid var(--ruts-gold);
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.avatar-edit-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--ruts-gold);
+  color: var(--ruts-navy);
+  border-radius: 50%;
+  padding: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: var(--shadow-md);
+}
+
+.user-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.user-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.role-badge {
+  background: var(--ruts-gold);
+  color: var(--ruts-navy);
+  padding: 0.125rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.user-meta-divider {
+  opacity: 0.6;
+}
+
+.user-meta-text {
+  font-weight: 300;
+}
+
+.user-department {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  font-weight: 300;
+  margin-top: 0.25rem;
+}
+
+/* =====================================
+   QUICK ACTIONS (Floating Card)
+   ===================================== */
+
+.quick-actions-container {
+  padding: 0 1.5rem;
+  margin-top: -2.5rem;
+  position: relative;
+  z-index: 20;
+}
+
+.quick-actions {
+  background: var(--surface-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--border-light);
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 0.25rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--bg-light);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.action-icon-wrapper {
+  background: rgba(0, 40, 85, 0.05);
+  color: var(--ruts-navy);
+  padding: 0.625rem;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.action-btn:active .action-icon-wrapper {
+  transform: scale(0.95);
+}
+
+.action-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.divider-vertical {
+  width: 1px;
+  height: 2.5rem;
+  background: var(--border-light);
+}
+
+/* =====================================
+   MAIN CONTENT (Sections & Cards)
+   ===================================== */
+
+.profile-content {
+  padding: 0 var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-header {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  padding: 0 var(--spacing-xs);
+  color: var(--ruts-navy);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.section-icon {
+  color: var(--ruts-gold);
+}
+
+.card {
+  background: var(--surface-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.card-row:last-child {
+  border-bottom: none;
+}
+
+.card-row-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.card-icon-wrapper {
+  background: rgba(0, 40, 85, 0.05);
+  color: var(--ruts-navy);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.card-text-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-label {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+.card-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.card-row-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.card-row-button:hover {
+  background: var(--bg-light);
+}
+
+.card-row-button:last-child {
+  border-bottom: none;
+}
+
+/* =====================================
+   TOGGLE SWITCH
+   ===================================== */
+
+.toggle-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  width: 2.75rem;
+  height: 1.5rem;
+  background: var(--border-light);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: all 0.3s;
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s;
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle-input:checked + .toggle-slider {
+  background: var(--ruts-gold);
+}
+
+.toggle-input:checked + .toggle-slider::after {
+  transform: translateX(1.25rem);
+}
+
+.card-row-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-sub);
+}
+
+.card-row-right-text {
+  font-size: 0.875rem;
+}
+
+/* =====================================
+   LOGOUT BUTTON
+   ===================================== */
+
+.logout-button {
+  width: 100%;
+  padding: 0.875rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--surface-light);
+  color: var(--red);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.logout-button:hover {
+  background: #fef2f2;
+}
+
+.logout-button:active {
+  transform: scale(0.98);
+}
+
+/* =====================================
+   FOOTER INFO
+   ===================================== */
+
+.version-info {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  opacity: 0.6;
+  margin-top: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+/* =====================================
+   MATERIAL ICONS (FILLED STATE)
+   ===================================== */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ========================================
+   MODAL STYLES (ส่วนที่หายไป)
+   ======================================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* พื้นหลังสีดำจางๆ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* ต้องสูงกว่า Bottom Nav (100) */
+  backdrop-filter: blur(4px); /* เบลอฉากหลัง */
+  animation: fadeIn 0.2s ease;
+}
+
+/* ล็อคขนาด Modal ไม่ให้ล้นจอมือถือ */
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 400px; /* ไม่ให้กว้างเกินไปบนจอคอม */
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+/* ส่วนหัว Modal */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--ruts-navy);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.close-btn {
+  background: #F1F5F9;
+  border: none;
+  cursor: pointer;
+  color: #64748B;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.close-btn span {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* ฟอร์มใน Modal */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ruts-navy);
+}
+
+.modal-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #0F172A;
+  background-color: #F8FAFC;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.modal-input:focus {
+  background-color: white;
+  border-color: var(--ruts-navy);
+  box-shadow: 0 0 0 3px rgba(0, 40, 85, 0.1);
+}
+
+/* ปุ่มบันทึก */
+.save-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--ruts-navy);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  box-shadow: 0 4px 12px rgba(0, 40, 85, 0.2);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.save-btn:hover {
+  background-color: #003380;
+  transform: translateY(-1px);
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+}
+
+.save-btn:disabled {
+  background-color: #94A3B8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ... (CSS เดิมที่มีอยู่) ... */
+
+/* ========================================
+   FULL SCREEN AVATAR MODAL (หน้าดูรูปโปรไฟล์)
+   ======================================== */
+
+.avatar-view-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000000; /* พื้นหลังสีดำทึบ */
+  z-index: 2000; /* สูงสุดๆ ทับทุกอย่าง */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.avatar-view-header {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 20px; /* เผื่อพื้นที่ด้านบน */
+}
+
+.avatar-view-close {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.avatar-view-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.avatar-view-image {
+  width: 80vw; /* กว้าง 80% ของจอ */
+  height: 80vw; /* สูงเท่าความกว้าง (เป็นสี่เหลี่ยมจัตุรัส) */
+  max-width: 400px;
+  max-height: 400px;
+  border-radius: 50%; /* วงกลม */
+  background-size: cover;
+  background-position: center;
+  border: 4px solid #333; /* ขอบสีเทาเข้ม */
+  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+}
+
+.avatar-view-footer {
+  display: flex;
+  gap: 15px;
+  padding-bottom: 40px;
+  justify-content: center;
+}
+
+.avatar-action-btn {
+  flex: 1;
+  background-color: #333333;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  max-width: 160px;
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.avatar-action-btn:active {
+  background-color: #444;
+  transform: scale(0.98);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* =====================================
+   RESPONSIVE
+   ===================================== */
+
+@media (max-width: 640px) {
+  .profile-header {
+    padding: 2rem var(--spacing-md) 3rem;
+  }
+
+  .avatar {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .user-name {
+    font-size: 1.25rem;
+  }
+
+  .quick-actions-container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .profile-content {
+    padding: 0 var(--spacing-sm);
+  }
+}

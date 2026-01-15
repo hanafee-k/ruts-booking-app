@@ -1,0 +1,88 @@
+/* src/components/layout/BottomNav.css */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 480px; /* บังคับขนาดให้เท่าแอป */
+  margin: 0 auto; /* จัดกึ่งกลางจอ */
+  
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid #E2E8F0;
+  
+  padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+  z-index: 100; /* ให้ลอยเหนือทุกอย่าง */
+  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 80px;
+}
+
+/* ปุ่มปกติ */
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 60px;
+  color: #64748B;
+  transition: all 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-btn:hover {
+  color: #002855;
+}
+
+.nav-btn-active {
+  color: #002855;
+}
+
+.nav-btn .material-symbols-outlined {
+  font-size: 26px;
+}
+
+/* ทำให้ไอคอนทึบเมื่อ Active (ถ้าฟอนต์รองรับ) */
+.icon-filled {
+  font-variation-settings: 'FILL' 1;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* --- ปุ่ม Scan QR ตรงกลาง (สีเหลือง) --- */
+.nav-center-wrapper {
+  margin-top: -45px; /* ดันขึ้นไปข้างบนให้ลอย */
+}
+
+.nav-center-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #FFB81C; /* สีเหลือง RUTS */
+  color: #002855; /* สีน้ำเงินเข้ม */
+  box-shadow: 0 4px 10px rgba(255, 184, 28, 0.4);
+  border: 4px solid #FFFFFF; /* ขอบขาวตัดพื้นหลัง */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.nav-center-btn:active {
+  transform: scale(0.95);
+}
+
+.nav-center-btn .material-symbols-outlined {
+  font-size: 30px;
+}
