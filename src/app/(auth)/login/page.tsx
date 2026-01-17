@@ -28,44 +28,45 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // 1. Login กับ Supabase Auth
+      // 1. Login
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (authError) {
-        if (authError.message === "Invalid login credentials") {
-          throw new Error("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-        }
-        if (authError.message === "Email not confirmed") {
-            throw new Error("กรุณายืนยันอีเมลก่อนเข้าใช้งาน");
-        }
-        throw authError;
-      }
+      if (authError) throw authError;
 
-      // ✅ 2. เช็ค Role จากตาราง profiles ว่าเป็น admin หรือไม่
+      // ✅ 2. เช็ค Role (แบบปลอดภัย)
       if (data.user) {
-        const { data: profile } = await supabase
+        // ใช้ maybeSingle() แทน single() เพื่อไม่ให้ Error ถ้าระบบหาไม่เจอ
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('role') // ดึง column role มาเช็ค
+            .select('role')
             .eq('id', data.user.id)
-            .single();
+            .maybeSingle(); 
 
-        // ตรวจสอบ Role และเด้งไปหน้าให้ถูก
+        if (profileError) {
+            console.error("Profile Error:", profileError.message);
+            // ถ้า Error เรื่อง Schema ให้ถือว่าเป็น User ธรรมดาไปก่อน กันค้าง
+            router.push("/dashboard");
+            return;
+        }
+
+        // ตรวจสอบ Role
         if (profile?.role === 'admin') {
-            router.push("/admin/dashboard"); // ถ้าเป็น Admin ไปหน้า Admin
+            router.push("/admin/dashboard");
         } else {
-            router.push("/dashboard");       // ถ้าเป็น User ทั่วไป ไปหน้าปกติ
+            router.push("/dashboard");
         }
       }
 
     } catch (err: any) {
-      setError(err.message || "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
-      setIsLoading(false); // ปิด Loading เฉพาะตอน Error (ตอน Success ปล่อยค้างไว้กัน User กดซ้ำก่อนเปลี่ยนหน้า)
+      console.error("Login Error:", err);
+      setError(err.message || "เข้าสู่ระบบไม่สำเร็จ");
+      setIsLoading(false);
     } 
   };
-
+  
   return (
     <div className="login-container">
       {/* Hero Section */}
