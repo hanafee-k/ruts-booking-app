@@ -31,20 +31,42 @@ export default function BookingConfirmPage() {
   const dateStr = searchParams.get('date') || new Date().toISOString().split('T')[0];
   const startTime = searchParams.get('startTime') || "09:00";
   
-  // --- 🕒 Logic เวลาทำการ (Business Hours) ---
-  const BUSINESS_OPEN = 8;  // 08:00
+  // --- 🕒 Logic เวลาทำการ & วันหยุด ---
+  const BUSINESS_OPEN = 8;   // 08:00
   const BUSINESS_CLOSE = 17; // 17:00
+  const BREAK_START = 12;    // 12:00
+  const BREAK_END = 13;      // 13:00
 
   const startHour = parseInt(startTime.split(':')[0]);
   const startMinute = startTime.split(':')[1] || "00";
 
-  // เช็คว่าเวลาเริ่ม อยู่ในเวลาทำการไหม? (08:00 - 16:59)
-  const isOutOfHours = startHour < BUSINESS_OPEN || startHour >= BUSINESS_CLOSE;
+  // 1. เช็ควันเสาร์-อาทิตย์
+  const bookingDate = new Date(dateStr);
+  const dayOfWeek = bookingDate.getDay(); // 0 = อาทิตย์, 6 = เสาร์
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+  // 2. เช็คเวลาพักเที่ยง
+  const isBreakTime = startHour >= BREAK_START && startHour < BREAK_END;
+
+  // 3. รวมเงื่อนไขที่ "จองไม่ได้" (นอกเวลา / พักเที่ยง / เสาร์อาทิตย์)
+  const isOutOfHours = 
+    startHour < BUSINESS_OPEN || 
+    startHour >= BUSINESS_CLOSE || 
+    isBreakTime || 
+    isWeekend;
   
-  // คำนวณว่าจองได้สูงสุดกี่ชั่วโมง (ไม่เกิน 17:00)
-  // เช่น เริ่ม 09:00 -> เหลือ 8 ชม. (ถึง 17:00)
-  // เช่น เริ่ม 16:00 -> เหลือ 1 ชม.
-  const maxDurationPossible = Math.max(0, BUSINESS_CLOSE - startHour);
+  // 4. คำนวณ Max Duration
+  let maxDurationPossible = 0;
+
+  if (!isOutOfHours) {
+    if (startHour < BREAK_START) {
+      // รอบเช้า: ถึงแค่ 12:00
+      maxDurationPossible = BREAK_START - startHour;
+    } else {
+      // รอบบ่าย: ถึงแค่ 17:00
+      maxDurationPossible = BUSINESS_CLOSE - startHour;
+    }
+  }
 
   // --- States ---
   const [room, setRoom] = useState<Room | null>(null);
@@ -53,22 +75,23 @@ export default function BookingConfirmPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // Form States
-  const [duration, setDuration] = useState(Math.min(2, maxDurationPossible)); // Default 2 ชม. หรือตามที่เหลือ
+  const [duration, setDuration] = useState(maxDurationPossible > 0 ? Math.min(2, maxDurationPossible) : 0);
   const [purpose, setPurpose] = useState("");
   const [attendees, setAttendees] = useState("");
   const [advisor, setAdvisor] = useState("");
   const [note, setNote] = useState("");
   const [isAgreed, setIsAgreed] = useState(true);
 
-  // คำนวณเวลาเลิก (EndTime) ตาม Duration ที่เลือก
   const endHour = startHour + duration; 
   const endTime = `${endHour.toString().padStart(2, '0')}:${startMinute}`;
 
   // --- Fetch Data ---
   useEffect(() => {
-    // ถ้าเวลาเริ่มไม่อยู่ในเกณฑ์ ให้ปรับ Duration เป็น 0 หรือค่าที่ถูกต้อง
-    if (isOutOfHours) setDuration(0);
-    else if (duration === 0 && maxDurationPossible > 0) setDuration(1);
+    if (isOutOfHours) {
+        setDuration(0);
+    } else {
+        setDuration(prev => Math.min(prev || 1, maxDurationPossible));
+    }
   }, [isOutOfHours, maxDurationPossible]);
 
   useEffect(() => {
@@ -98,6 +121,7 @@ export default function BookingConfirmPage() {
       if (roomData) {
         setRoom(roomData);
       } else {
+        // Fallback Mock Data
         setRoom({
           id: parseInt(roomId),
           name: "ห้องปฏิบัติการคอมพิวเตอร์ 402",
@@ -114,13 +138,17 @@ export default function BookingConfirmPage() {
 
   const formatDisplayDate = (d: string) => {
     return new Date(d).toLocaleDateString('th-TH', { 
-      day: 'numeric', month: 'short', year: 'numeric' 
+      day: 'numeric', month: 'short', year: 'numeric', weekday: 'long'
     });
   };
 
   const handleSubmit = async () => {
+    if (isWeekend) {
+      alert("ไม่เปิดให้บริการในวันเสาร์-อาทิตย์ครับ");
+      return;
+    }
     if (isOutOfHours || duration <= 0) {
-      alert("ไม่สามารถจองนอกเวลาทำการได้ (08:00 - 17:00 น.)");
+      alert("ไม่สามารถจองนอกเวลาทำการ หรือช่วงพักเที่ยงได้");
       return;
     }
     if (!purpose || !attendees) {
@@ -133,12 +161,9 @@ export default function BookingConfirmPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // ✅ แก้ตรงนี้: แปลงเวลา Local (ไทย) -> UTC ก่อนบันทึก
-      // สร้าง Date Object จากวันที่และเวลาที่เลือก
       const startDateTimeLocal = new Date(`${dateStr}T${startTime}:00`);
       const endDateTimeLocal = new Date(`${dateStr}T${endTime}:00`);
 
-      // .toISOString() จะแปลงเป็น UTC ให้อัตโนมัติ (เช่น 09:00 ไทย -> 02:00Z)
       const startISO = startDateTimeLocal.toISOString();
       const endISO = endDateTimeLocal.toISOString();
 
@@ -147,8 +172,8 @@ export default function BookingConfirmPage() {
         .insert({
           user_id: user.id,
           room_id: parseInt(roomId),
-          start_time: startISO, // ส่งค่า UTC
-          end_time: endISO,     // ส่งค่า UTC
+          start_time: startISO,
+          end_time: endISO,
           title: purpose,
           purpose: purpose,
           status: 'pending',
@@ -160,7 +185,7 @@ export default function BookingConfirmPage() {
       if (error) throw error;
 
       alert("จองห้องสำเร็จ! กรุณารอการอนุมัติ");
-      router.push('/schedule'); // แนะนำให้ไปหน้าตารางเรียนเพื่อดูผลลัพธ์
+      router.push('/schedule');
 
     } catch (err: any) {
       console.error(err);
@@ -186,10 +211,16 @@ export default function BookingConfirmPage() {
 
       <main className="confirm-content">
         
-        {/* Warning Badge ถ้านอกเวลา */}
+        {/* ⚠️ Warning Badge */}
         {isOutOfHours && (
           <div style={{background:'#fef2f2', color:'#dc2626', padding:'12px', borderRadius:'8px', fontSize:'0.9rem', border:'1px solid #fecaca'}}>
-            ⚠️ <b>อยู่นอกเวลาทำการ</b> (08:00 - 17:00 น.)<br/>กรุณาเลือกเวลาใหม่ในหน้าค้นหา
+            ⚠️ <b>ไม่สามารถจองได้</b><br/>
+            {isWeekend 
+              ? "ปิดให้บริการในวันเสาร์ - อาทิตย์"
+              : isBreakTime 
+                ? "ติดช่วงเวลาพักเที่ยง (12:00 - 13:00 น.)" 
+                : "อยู่นอกเวลาทำการ (08:00 - 17:00 น.)"
+            }
           </div>
         )}
 
@@ -212,7 +243,7 @@ export default function BookingConfirmPage() {
           </div>
         </section>
 
-        {/* Info Section (ปรับแก้ให้เลือก Duration ได้) */}
+        {/* Info Section */}
         <section className="info-section">
           <h3 className="section-head">
             <span className="material-symbols-outlined" style={{color:'var(--b-secondary)'}}>calendar_month</span>
@@ -233,7 +264,6 @@ export default function BookingConfirmPage() {
             <div className="info-footer">
               <div className="info-col">
                 <span className="info-label">ระยะเวลา (ชั่วโมง)</span>
-                {/* ⭐ ตัวเลือกจำนวนชั่วโมง */}
                 <select 
                   className="form-select" 
                   style={{padding:'4px 8px', width:'auto', minWidth:'100px'}}
@@ -242,7 +272,7 @@ export default function BookingConfirmPage() {
                   disabled={isOutOfHours}
                 >
                   {isOutOfHours ? (
-                    <option value="0">นอกเวลาทำการ</option>
+                    <option value="0">-</option>
                   ) : (
                     Array.from({length: maxDurationPossible}, (_, i) => i + 1).map(h => (
                       <option key={h} value={h}>{h} ชั่วโมง</option>
@@ -321,7 +351,12 @@ export default function BookingConfirmPage() {
           style={{opacity: (submitting || !isAgreed || isOutOfHours) ? 0.5 : 1}}
           onClick={handleSubmit}
         >
-          {isOutOfHours ? "อยู่นอกเวลาทำการ" : (submitting ? "กำลังบันทึก..." : "ยืนยันการจอง")}
+          {isWeekend 
+            ? "ปิดทำการ (เสาร์-อาทิตย์)" 
+            : isOutOfHours 
+              ? "เวลาไม่ถูกต้อง" 
+              : (submitting ? "กำลังบันทึก..." : "ยืนยันการจอง")
+          }
         </button>
       </footer>
     </div>

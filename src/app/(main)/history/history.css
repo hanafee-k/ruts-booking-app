@@ -1,0 +1,246 @@
+/* =================================================================
+   HISTORY PAGE STYLES (Responsive Update)
+   ================================================================= */
+
+:root {
+  --h-primary: #0f172a;
+  --h-accent: #FDB515;
+  --h-bg: #F8FAFC;
+  --h-white: #ffffff;
+  --h-text-main: #1e293b;
+  --h-text-sub: #64748b;
+  --h-line: #e2e8f0;
+  --h-green: #22c55e;
+  --h-red: #ef4444;
+  --h-orange: #f59e0b;
+}
+
+.history-page {
+  background-color: var(--h-bg);
+  min-height: 100vh;
+  padding-bottom: 100px;
+  font-family: 'Noto Sans Thai', sans-serif;
+  color: var(--h-text-main);
+}
+
+/* --- HEADER --- */
+.history-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* รองรับ iOS */
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.history-title h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--h-primary);
+  margin: 0;
+}
+
+.history-title span { color: var(--h-accent); }
+
+/* --- TABS --- */
+.history-tabs {
+  padding: 12px 20px 0;
+  position: sticky;
+  top: 65px; /* ปรับให้พอดีกับ Header ในมือถือ */
+  z-index: 40;
+  background: var(--h-bg);
+}
+
+.tab-group {
+  display: flex;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--h-text-sub);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab-btn.active {
+  background: var(--h-white);
+  color: var(--h-primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* --- LIST AREA --- */
+.history-list {
+  padding: 16px 20px; /* ลด Padding ในมือถือ */
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* ลด Gap ระหว่างการ์ด */
+}
+
+/* --- CARD --- */
+.history-card {
+  background: var(--h-white);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  border: 1px solid var(--h-line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s;
+}
+
+.history-card:active { transform: scale(0.98); }
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* จัดการชื่อห้องยาวๆ ในมือถือไม่ให้ตกบรรทัด */
+.room-info {
+  flex: 1;
+  min-width: 0;
+  margin-right: 8px;
+}
+
+.room-info h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--h-primary);
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* ตัดคำยาวๆ ด้วย ... */
+}
+
+.room-info p {
+  font-size: 0.75rem;
+  color: var(--h-text-sub);
+  margin: 0;
+}
+
+.status-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  flex-shrink: 0; /* ห้ามโดนบีบ */
+}
+
+.status-badge.pending { background: #fff7ed; color: var(--h-orange); border: 1px solid #ffedd5; }
+.status-badge.approved { background: #f0fdf4; color: var(--h-green); border: 1px solid #dcfce7; }
+.status-badge.rejected { background: #fef2f2; color: var(--h-red); border: 1px solid #fee2e2; }
+.status-badge.cancelled { background: #f1f5f9; color: var(--h-text-sub); border: 1px solid #e2e8f0; }
+
+.card-divider {
+  height: 1px;
+  background: var(--h-line);
+  width: 100%;
+  opacity: 0.6;
+}
+
+.card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--h-text-main);
+}
+
+.icon-box {
+  width: 24px;
+  height: 24px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--h-text-sub);
+  flex-shrink: 0;
+}
+
+.icon-box span { font-size: 14px; }
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--h-text-sub);
+  opacity: 0.7;
+}
+.empty-icon { font-size: 48px; margin-bottom: 8px; }
+
+/* Cancel Button */
+.btn-cancel {
+  width: 100%;
+  padding: 12px; /* เพิ่มพื้นที่สัมผัส */
+  border: 1px solid var(--h-red);
+  color: var(--h-red);
+  background: white;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.btn-cancel:active { background: #fef2f2; }
+
+/* =====================================
+   📱 MOBILE RESPONSIVE TWEAKS
+   (เฉพาะหน้าจอเล็กกว่า 640px)
+   ===================================== */
+@media (max-width: 640px) {
+  .history-header {
+    padding: 12px 16px;
+  }
+  
+  .history-title h1 {
+    font-size: 1.25rem; /* ลดขนาดหัวข้อ */
+  }
+
+  .history-tabs {
+    top: 55px; /* ปรับ Sticky ให้พอดีกับ Header ที่เล็กลง */
+    padding: 8px 16px 0;
+  }
+
+  .tab-btn {
+    font-size: 0.8rem; /* ลดขนาดตัวอักษร Tab */
+    padding: 8px;
+  }
+
+  .history-list {
+    padding: 12px 16px;
+  }
+
+  .history-card {
+    padding: 14px;
+  }
+
+  /* ปรับการแสดงผลรายละเอียดในการ์ด */
+  .detail-row span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px; /* กันข้อความยาวเกินจอ */
+  }
+}

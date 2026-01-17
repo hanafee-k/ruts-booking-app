@@ -83,7 +83,7 @@ export default function BottomNav({ onQuickAction }: BottomNavProps) {
         onClick={() => handleNavClick("schedule")}
       >
         <span className="material-symbols-outlined">calendar_today</span>
-        <span className="nav-label">ตารางเรียน</span>
+        <span className="nav-label">ตารางการจอง</span>
       </button>
       
       <button 

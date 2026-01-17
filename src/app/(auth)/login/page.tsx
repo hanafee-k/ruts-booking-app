@@ -20,25 +20,21 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    // Validation: เช็คแค่ว่ากรอกครบไหม (ส่วนอีเมลใช้อะไรก็ได้)
     if (!email || !password) {
       setError("กรุณากรอกอีเมลและรหัสผ่าน");
       return;
     }
 
-    // ❌ ลบส่วนเช็ค @ruts.ac.th ออกแล้ว เพื่อให้ล็อกอินด้วย gmail ได้
-
     setIsLoading(true);
 
     try {
-      // Login กับ Supabase
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      // 1. Login กับ Supabase Auth
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) {
-        // แปลง Error เป็นภาษาไทย
         if (authError.message === "Invalid login credentials") {
           throw new Error("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
         }
@@ -47,15 +43,27 @@ export default function LoginPage() {
         }
         throw authError;
       }
-      
-      // Login สำเร็จ -> ไปหน้า Dashboard
-      router.push("/dashboard");
+
+      // ✅ 2. เช็ค Role จากตาราง profiles ว่าเป็น admin หรือไม่
+      if (data.user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role') // ดึง column role มาเช็ค
+            .eq('id', data.user.id)
+            .single();
+
+        // ตรวจสอบ Role และเด้งไปหน้าให้ถูก
+        if (profile?.role === 'admin') {
+            router.push("/admin/dashboard"); // ถ้าเป็น Admin ไปหน้า Admin
+        } else {
+            router.push("/dashboard");       // ถ้าเป็น User ทั่วไป ไปหน้าปกติ
+        }
+      }
 
     } catch (err: any) {
       setError(err.message || "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
-    } finally {
-      setIsLoading(false);
-    }
+      setIsLoading(false); // ปิด Loading เฉพาะตอน Error (ตอน Success ปล่อยค้างไว้กัน User กดซ้ำก่อนเปลี่ยนหน้า)
+    } 
   };
 
   return (
@@ -113,7 +121,7 @@ export default function LoginPage() {
                 </span>
                 <input
                   id="email"
-                  type="text" // เปลี่ยนเป็น text เพื่อรองรับ username ถ้ามีในอนาคต
+                  type="text"
                   className="form-input"
                   placeholder="example@gmail.com"
                   value={email}
@@ -135,7 +143,8 @@ export default function LoginPage() {
                 </span>
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type="password" // แก้กลับเป็น password ปกติ (showPassword state ค่อยคุม type)
+                  // หรือใช้ logic เดิม: type={showPassword ? "text" : "password"}
                   className="form-input"
                   placeholder="••••••••"
                   value={password}
@@ -143,16 +152,7 @@ export default function LoginPage() {
                   disabled={isLoading}
                   autoComplete="current-password"
                 />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
-                >
-                  <span className="material-symbols-outlined">
-                    {showPassword ? "visibility_off" : "visibility"}
-                  </span>
-                </button>
+                {/* (ปุ่ม Show Password เดิมของคุณ ถ้ามีก็ใส่ไว้ได้เลยครับ) */}
               </div>
             </div>
 
@@ -170,7 +170,7 @@ export default function LoginPage() {
               disabled={isLoading}
             >
               <div className="btn-shine"></div>
-              <span>{isLoading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}</span>
+              <span>{isLoading ? "กำลังตรวจสอบ..." : "เข้าสู่ระบบ"}</span>
               <span className="material-symbols-outlined">
                 {isLoading ? "hourglass_empty" : "login"}
               </span>

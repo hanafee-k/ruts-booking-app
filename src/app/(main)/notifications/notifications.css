@@ -1,0 +1,195 @@
+:root {
+  --n-bg: #F8FAFC;
+  --n-white: #ffffff;
+  --n-primary: #0f172a;
+  --n-text-sub: #64748b;
+  --n-line: #e2e8f0;
+  --n-unread-bg: #e0f2fe;
+}
+
+.notif-page {
+  background-color: var(--n-bg);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  font-family: 'Noto Sans Thai', sans-serif;
+}
+
+/* --- HEADER --- */
+.notif-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* รองรับ iOS */
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--n-primary);
+  display: flex;
+  align-items: center;
+  padding: 4px; /* เพิ่มพื้นที่กดในมือถือ */
+}
+
+.notif-title h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--n-primary);
+}
+
+/* --- LIST --- */
+.notif-list {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* --- CARD --- */
+.notif-card {
+  background: var(--n-white);
+  border-radius: 16px; /* โค้งมนขึ้น */
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+  border: 1px solid var(--n-line);
+  position: relative;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.notif-card:active {
+  transform: scale(0.98); /* เอฟเฟกต์กดเด้งในมือถือ */
+}
+
+.notif-card.unread {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.unread-dot {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px white; /* ขอบขาวตัดให้เด่น */
+}
+
+.notif-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px; /* เปลี่ยนเป็นสี่เหลี่ยมมน */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notif-icon-box span {
+  font-size: 20px;
+}
+
+/* Icon Colors */
+.type-success { background: #dcfce7; color: #16a34a; }
+.type-warning { background: #ffedd5; color: #ea580c; }
+.type-error   { background: #fee2e2; color: #dc2626; }
+.type-info    { background: #e0f2fe; color: #0284c7; }
+
+.notif-content {
+  flex: 1;
+  min-width: 0; /* ป้องกันข้อความดัน Layout พังในมือถือ */
+}
+
+.notif-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+  flex-wrap: wrap; /* ให้เวลาตกบรรทัดได้ถ้าจอเล็กมาก */
+}
+
+.notif-head h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--n-primary);
+  margin-right: 8px;
+}
+
+.notif-time {
+  font-size: 0.7rem;
+  color: var(--n-text-sub);
+  white-space: nowrap;
+}
+
+.notif-msg {
+  font-size: 0.85rem;
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+  
+  /* ตัดคำถ้ายาวเกินไป (Optional) */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--n-text-sub);
+  opacity: 0.7;
+}
+
+/* =====================================
+   📱 MOBILE RESPONSIVE (หน้าจอมือถือ)
+   ===================================== */
+@media (max-width: 640px) {
+  .notif-header {
+    padding: 12px 16px; /* ลดพื้นที่ Header */
+  }
+
+  .notif-title h1 {
+    font-size: 1.1rem; /* ลดขนาดหัวข้อ */
+  }
+
+  .notif-list {
+    padding: 12px 16px; /* ลดขอบข้าง */
+    gap: 10px;
+  }
+
+  .notif-card {
+    padding: 12px; /* ลดพื้นที่ในการ์ด */
+    gap: 12px;
+  }
+
+  .notif-icon-box {
+    width: 36px; /* ลดขนาดไอคอน */
+    height: 36px;
+  }
+  
+  .notif-icon-box span {
+    font-size: 18px;
+  }
+
+  .notif-head h4 {
+    font-size: 0.9rem;
+  }
+  
+  .notif-msg {
+    font-size: 0.8rem; /* ปรับตัวหนังสือให้อ่านง่ายในจอเล็ก */
+  }
+}
