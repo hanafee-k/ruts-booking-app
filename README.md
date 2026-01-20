@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RUTS Engineering Booking System 📚
 
-## Getting Started
+ระบบจองห้องเรียนออนไลน์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเทคโนโลยีราชมงคลศรีวิชัย
+(Online Classroom Booking System for Faculty of Engineering, RUTS)
 
-First, run the development server:
+[![Vercel Deployment]](https://ruts-booking-app.vercel.app)
+> 🔗 **Live Demo:** [ทดลองใช้งานระบบจริง (Vercel)](https://ruts-booking-app.vercel.app)
 
+---
+
+## ✨ เกี่ยวกับโปรเจกต์ (About The Project)
+
+โปรเจกต์นี้พัฒนาขึ้นเพื่ออำนวยความสะดวกให้กับนักศึกษาและอาจารย์ในการตรวจสอบสถานะห้องว่าง
+และทำการจองห้องเรียน ช่วยลดความซ้ำซ้อนในการจองและช่วยให้ผู้ดูแลระบบจัดการข้อมูลได้ง่ายขึ้น
+
+### 🔥 ฟีเจอร์หลัก (Key Features)
+
+* **Authentication System:** ระบบสมัครสมาชิกและเข้าสู่ระบบที่ปลอดภัยด้วย Supabase Auth
+* **Role-Based Access Control (RBAC):** แยกสิทธิ์การใช้งานชัดเจน
+    * **Student:** ดูตารางห้องว่าง, จองห้อง, ดูประวัติการจองของตัวเอง
+    * **Admin:** จัดการข้อมูลห้องพัก, อนุมัติ/ไม่อนุมัติการจอง, ดูภาพรวมการจองทั้งหมด
+* **Real-time Booking Status:** ตรวจสอบสถานะห้องว่างได้ทันที
+* **Responsive Design:** รองรับการใช้งานผ่านมือถือ แท็บเล็ต และคอมพิวเตอร์
+* **User-Friendly Interface:** ดีไซน์ทันสมัย ใช้งานง่ายด้วย 
+
+---
+
+## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
+
+* **Frontend:** [Next.js 16](https://nextjs.org/) (App Router, Server Components)
+* **Language:** [TypeScript](https://www.typescriptlang.org/)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+* **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL)
+* **Deployment:** [Vercel](https://vercel.com/)
+* **Icons:** Material Symbols
+
+---
+
+## 🚀 การติดตั้งและรันโปรเจกต์ (Getting Started)
+
+หากต้องการรันโปรเจกต์นี้ในเครื่องของคุณ (Local Environment) ให้ทำตามขั้นตอนดังนี้:
+
+### 1. Clone Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone [https://github.com/YOUR_USERNAME/ruts-booking-app.git](https://github.com/YOUR_USERNAME/ruts-booking-app.git)
+cd ruts-booking-app
