@@ -42,5 +42,5 @@
 
 ### 1. Clone Repository
 ```bash
-git clone [https://github.com/YOUR_USERNAME/ruts-booking-app.git](https://github.com/YOUR_USERNAME/ruts-booking-app.git)
+git clone [hhttps://github.com/hanafee-k/ruts-booking-app](https://github.com/hanafee-k/ruts-booking-app)
 cd ruts-booking-app
