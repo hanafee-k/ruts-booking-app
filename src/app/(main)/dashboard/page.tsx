@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import "./dashboard.css";
 
-// Interface สำหรับข้อมูลการจอง
+// Interface สำหรับข้อมูลการจอง (ปรับให้ตรงกับ State ที่เราใช้)
 interface Booking {
   id: string;
   room_name: string;
+  room_image?: string; // เพิ่มรูปห้องเผื่อดึงมาได้
   start_time: string;
   end_time: string;
   purpose: string;
@@ -67,21 +68,45 @@ export default function DashboardPage() {
         }
 
         // 3. ดึงข้อมูลการจอง (Upcoming Bookings)
-        // สมมติว่ามีตาราง 'bookings'
         const now = new Date().toISOString();
-        const { data: bookingsData } = await supabase
-          .from('bookings') // ⚠️ ต้องมีตารางนี้ใน Supabase
-          .select('*')
+        
+        // 🔥 แก้ไขจุดที่ 1: Join ตาราง rooms เพื่อเอาชื่อห้อง + เช็ค end_time แทน start_time
+        const { data: bookingsData, error: bookingError } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            rooms (
+              name,
+              image_url
+            )
+          `)
           .eq('user_id', user.id)
-          .gte('start_time', now) // เอาเฉพาะเวลาในอนาคต
-          .neq('status', 'cancelled') // ไม่เอาที่ยกเลิก
+          .gte('end_time', now)        // ✅ เอาอันที่ "ยังไม่จบ" (รวมกำลังเรียนอยู่ด้วย)
+          .neq('status', 'cancelled')
           .order('start_time', { ascending: true })
           .limit(5);
 
+        if (bookingError) {
+          console.error("Booking Query Error:", bookingError);
+        }
+
         if (bookingsData && bookingsData.length > 0) {
-          setUpcomingBookings(bookingsData as Booking[]);
-          // สมมติว่าการจองที่ใกล้ที่สุดคือ Next Class/Agenda
-          setNextClass(bookingsData[0] as Booking);
+          // 🔥 แก้ไขจุดที่ 2: Map ข้อมูลจาก Joined Table ให้เข้ากับ Interface
+          const formattedBookings: Booking[] = bookingsData.map((b: any) => ({
+            id: b.id,
+            room_name: b.rooms?.name || "ห้องไม่ระบุ", // ดึงชื่อจากตาราง rooms
+            room_image: b.rooms?.image_url,
+            start_time: b.start_time,
+            end_time: b.end_time,
+            purpose: b.purpose,
+            status: b.status
+          }));
+
+          setUpcomingBookings(formattedBookings);
+          setNextClass(formattedBookings[0]); // ตัวแรกสุดคือ Next Class
+        } else {
+            setUpcomingBookings([]);
+            setNextClass(null);
         }
 
       } catch (error) {
@@ -96,7 +121,6 @@ export default function DashboardPage() {
 
   // --- Helper Functions ---
 
-  // แปลงวันที่สำหรับกล่องวันที่ (เช่น 24 ต.ค.)
   const formatDateBox = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate();
@@ -104,16 +128,21 @@ export default function DashboardPage() {
     return { day, month };
   };
 
-  // แปลงเวลา (เช่น 13:30 - 15:30)
   const formatTimeRange = (start: string, end: string) => {
     const s = new Date(start).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
     const e = new Date(end).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
     return `${s} - ${e}`;
   };
 
-  // นำทาง
   const navigateTo = (path: string) => {
     router.push(path);
+  };
+
+  // เช็คสถานะว่าเป็น "กำลังเรียน" หรือ "กำลังจะถึง"
+  const getStatusLabel = (startTime: string) => {
+      const start = new Date(startTime).getTime();
+      const now = new Date().getTime();
+      return now >= start ? "กำลังดำเนินการ" : "กำลังมาถึง";
   };
 
   if (loading) {
@@ -123,7 +152,7 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-page">
 
-      {/* 1. Sticky Header */}
+      {/* Header & Profile code... (เหมือนเดิม) */}
       <header className="dash-header">
         <div className="dash-header-left">
           <div className="brand-logo">
@@ -139,7 +168,6 @@ export default function DashboardPage() {
         </button>
       </header>
 
-      {/* 2. Profile Section */}
       <section className="profile-section">
         <div className="profile-avatar-wrapper">
           <div
@@ -155,7 +183,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* 3. Today's Agenda (ใช้ Booking ล่าสุดมาแสดงแทน Agenda) */}
+      {/* --- ส่วนที่แก้ Agenda --- */}
       <div className="section-title-row">
         <h2 className="section-title">กำหนดการวันนี้</h2>
         <span className="date-label">{today}</span>
@@ -166,9 +194,13 @@ export default function DashboardPage() {
           <>
             <div
               className="agenda-image"
-              style={{ backgroundImage: `url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')` }}
+              style={{ 
+                  backgroundImage: `url('${nextClass.room_image || "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}')` 
+              }}
             >
-              <span className="status-badge-ongoing">กำลังมาถึง</span>
+              <span className={`status-badge-ongoing ${getStatusLabel(nextClass.start_time) === 'กำลังดำเนินการ' ? 'active-now' : ''}`}>
+                {getStatusLabel(nextClass.start_time)}
+              </span>
             </div>
 
             <div className="agenda-content">
@@ -195,53 +227,46 @@ export default function DashboardPage() {
           <div style={{ padding: '2rem', textAlign: 'center', color: '#ccc' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '48px', marginBottom: '10px' }}>event_busy</span>
             <p>ไม่มีรายการจองหรือเรียนเร็วๆ นี้</p>
-            <button className="view-btn" style={{ marginTop: '10px' }} onClick={() => navigateTo('/booking')}>จองห้องเลย</button>
+            <button className="view-btn" style={{ marginTop: '10px' }} onClick={() => navigateTo('/search')}>จองห้องเลย</button>
           </div>
         )}
       </section>
 
-      {/* 4. Quick Actions (ทำงานได้จริง) */}
+      {/* Quick Actions code... (เหมือนเดิม) */}
       <section style={{ padding: '0 1rem', marginTop: '1.5rem' }}>
         <h3 className="section-title" style={{ marginBottom: '1rem' }}>เมนูลัด</h3>
         <div className="quick-actions-grid">
-
-          <div className="qa-item" onClick={() => navigateTo('/search')}>
-            <button className="qa-btn">
-              <span className="material-symbols-outlined filled" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
-            </button>
-            <span className="qa-label">จองห้อง</span>
-          </div>
-
-          <div className="qa-item" onClick={() => navigateTo('/schedule')}>
-            <button className="qa-btn">
-              <span className="material-symbols-outlined filled" style={{ fontVariationSettings: "'FILL' 1" }}>calendar_month</span>
-            </button>
-            <span className="qa-label">ตารางเรียน</span>
-          </div>
-
-          <div className="qa-item" onClick={() => navigateTo('/history')}>
-            <button className="qa-btn">
-              <span className="material-symbols-outlined filled" style={{ fontVariationSettings: "'FILL' 1" }}>history</span>
-            </button>
-            <span className="qa-label">ประวัติ</span>
-          </div>
-
-          <div
-            className="qa-item"
-            onClick={() => window.open("https://www.google.com/maps/search/?api=1&query=มหาวิทยาลัยเทคโนโลยีราชมงคลศรีวิชัย+สงขลา", "_blank")}
-            style={{ cursor: "pointer" }} // เพิ่ม cursor ให้รู้ว่ากดได้
-          >
-            <button className="qa-btn">
-              <span className="material-symbols-outlined filled" style={{ fontVariationSettings: "'FILL' 1" }}>map</span>
-            </button>
-            <span className="qa-label">แผนที่</span>
-          </div>
-
+             {/* ...ปุ่มเดิม... */}
+             <div className="qa-item" onClick={() => navigateTo('/search')}> {/* แก้ Link ให้ตรงกับหน้าจอง */}
+                <button className="qa-btn">
+                  <span className="material-symbols-outlined filled">add_circle</span>
+                </button>
+                <span className="qa-label">จองห้อง</span>
+             </div>
+             {/* ... */}
+             <div className="qa-item" onClick={() => navigateTo('/schedule')}>
+                <button className="qa-btn">
+                    <span className="material-symbols-outlined filled">calendar_month</span>
+                </button>
+                <span className="qa-label">ตารางเรียน</span>
+             </div>
+             <div className="qa-item" onClick={() => navigateTo('/history')}>
+                <button className="qa-btn">
+                    <span className="material-symbols-outlined filled">history</span>
+                </button>
+                <span className="qa-label">ประวัติ</span>
+             </div>
+             <div className="qa-item" onClick={() => window.open("https://maps.google.com", "_blank")}>
+                <button className="qa-btn">
+                    <span className="material-symbols-outlined filled">map</span>
+                </button>
+                <span className="qa-label">แผนที่</span>
+             </div>
         </div>
       </section>
 
-      {/* 5. Upcoming Bookings (เชื่อม DB) */}
-      <section style={{ marginTop: '1.5rem' }}>
+      {/* Upcoming List code... (เหมือนเดิม) */}
+      <section style={{ marginTop: '1.5rem', marginBottom: '80px' }}>
         <div className="section-title-row">
           <h3 className="section-title">การจองเร็วๆ นี้</h3>
           <button className="see-all-btn" onClick={() => navigateTo('/history')}>ดูทั้งหมด</button>
@@ -276,7 +301,6 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
-
     </div>
   );
 }
