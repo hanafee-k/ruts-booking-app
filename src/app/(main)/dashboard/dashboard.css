@@ -10,16 +10,6 @@
   --dash-accent-dark: #221f10; /* สีพื้นหลังเข้มของ Agenda */
 }
 
-/* Dark Mode Support (ถ้าโปรเจกต์มี) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --dash-bg: #1e1e1e;
-    --dash-card-bg: #2d2d2d;
-    --dash-text-main: #ffffff;
-    --dash-text-sub: #9ca3af;
-  }
-}
-
 .dashboard-page {
   background-color: var(--dash-bg);
   min-height: 100vh;

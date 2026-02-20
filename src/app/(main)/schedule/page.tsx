@@ -124,10 +124,25 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* 3. Date Selection (แก้ใหม่: ใช้ JS สั่งเปิด 100% กดง่ายแน่นอน) */}
+     {/* 3. Date Selection (แก้ใหม่: ใช้ CSS Trick บังคับปฏิทินเด้ง 100%) */}
       <div className="section-container" style={{marginTop: '16px'}}>
+        
+        {/* 🔥 ท่าไม้ตาย: CSS ขยายปุ่มกดปฏิทิน (Indicator) ให้เต็มกล่อง 100% */}
+        <style>{`
+          .date-overlay::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            opacity: 0; /* ซ่อนไอคอนเดิมไว้ */
+          }
+        `}</style>
+
         <div 
-          onClick={() => dateInputRef.current?.showPicker()} // ✅ สั่งเปิดปฏิทินทันทีที่แตะกล่อง
           style={{
             position: 'relative',
             background: '#ffffff',
@@ -138,11 +153,11 @@ export default function SchedulePage() {
             alignItems: 'center',
             justifyContent: 'space-between',
             boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-            cursor: 'pointer' // ให้รู้ว่ากดได้
+            overflow: 'hidden'
           }}
         >
-           {/* ส่วนแสดงผล: ใส่ pointerEvents: 'none' เพื่อให้นิ้วทะลุไปกดกล่องแม่ */}
-           <div style={{display:'flex', alignItems:'center', gap:'12px', pointerEvents: 'none'}}>
+           {/* UI ด้านหน้า (แสดงผลสวยๆ) */}
+           <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
               <div style={{
                   width:'40px', height:'40px', 
                   background:'#f1f5f9', borderRadius:'10px', 
@@ -159,20 +174,21 @@ export default function SchedulePage() {
               </div>
            </div>
            
-           <span className="material-symbols-outlined" style={{color:'#94a3b8', pointerEvents: 'none'}}>expand_more</span>
+           <span className="material-symbols-outlined" style={{color:'#94a3b8'}}>expand_more</span>
 
-           {/* Input ซ่อนไว้ข้างหลังเฉยๆ เพื่อรอคำสั่ง showPicker */}
+           {/* Input จริงที่ซ่อนไว้ แต่ปุ่มกดถูกขยายเต็มพื้นที่แล้ว */}
            <input 
-              ref={dateInputRef}
               type="date"
+              className="date-overlay"
               style={{
                 position: 'absolute',
-                opacity: 0,
-                bottom: 0,
+                top: 0,
                 left: 0,
-                width: 1,  // ทำให้เล็กจนไม่กวน layout
-                height: 1,
-                pointerEvents: 'none' // ห้ามกดโดนตัว input เอง (เราจะใช้กล่องแม่กดแทน)
+                width: '100%',
+                height: '100%',
+                opacity: 0, 
+                cursor: 'pointer',
+                zIndex: 10 /* ดันมาไว้หน้าสุดเพื่อรับการสัมผัส */
               }}
               value={formatDateForInput(selectedDate)}
               onChange={(e) => {
