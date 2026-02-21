@@ -42,13 +42,13 @@ export default function BookingConfirmPage() {
 
   // 1. เช็ควันเสาร์-อาทิตย์
   const bookingDate = new Date(dateStr);
-  const dayOfWeek = bookingDate.getDay(); // 0 = อาทิตย์, 6 = เสาร์
+  const dayOfWeek = bookingDate.getDay(); 
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
   // 2. เช็คเวลาพักเที่ยง
   const isBreakTime = startHour >= BREAK_START && startHour < BREAK_END;
 
-  // 3. รวมเงื่อนไขที่ "จองไม่ได้" (นอกเวลา / พักเที่ยง / เสาร์อาทิตย์)
+  // 3. รวมเงื่อนไขที่ "จองไม่ได้"
   const isOutOfHours = 
     startHour < BUSINESS_OPEN || 
     startHour >= BUSINESS_CLOSE || 
@@ -60,10 +60,8 @@ export default function BookingConfirmPage() {
 
   if (!isOutOfHours) {
     if (startHour < BREAK_START) {
-      // รอบเช้า: ถึงแค่ 12:00
       maxDurationPossible = BREAK_START - startHour;
     } else {
-      // รอบบ่าย: ถึงแค่ 17:00
       maxDurationPossible = BUSINESS_CLOSE - startHour;
     }
   }
@@ -77,10 +75,14 @@ export default function BookingConfirmPage() {
   // Form States
   const [duration, setDuration] = useState(maxDurationPossible > 0 ? Math.min(2, maxDurationPossible) : 0);
   const [purpose, setPurpose] = useState("");
+  const [otherPurpose, setOtherPurpose] = useState(""); // 🌟 State ใหม่สำหรับเก็บค่า "อื่นๆ" ที่พิมพ์เอง
   const [attendees, setAttendees] = useState("");
   const [advisor, setAdvisor] = useState("");
   const [note, setNote] = useState("");
   const [isAgreed, setIsAgreed] = useState(true);
+
+  // State สำหรับเก็บข้อความแจ้งเตือนจำนวนคน
+  const [attendeesError, setAttendeesError] = useState("");
 
   const endHour = startHour + duration; 
   const endTime = `${endHour.toString().padStart(2, '0')}:${startMinute}`;
@@ -132,7 +134,7 @@ export default function BookingConfirmPage() {
       }
 
       setLoading(false);
-    };
+    };    
     initData();
   }, [roomId, supabase, router]);
 
@@ -140,6 +142,29 @@ export default function BookingConfirmPage() {
     return new Date(d).toLocaleDateString('th-TH', { 
       day: 'numeric', month: 'short', year: 'numeric', weekday: 'long'
     });
+  };
+
+  const handleAttendeesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    
+    if (val === "") {
+      setAttendees("");
+      setAttendeesError("");
+      return;
+    }
+
+    const num = parseInt(val, 10);
+    
+    if (room && num > room.capacity) {
+      setAttendees(room.capacity.toString());
+      setAttendeesError(`จำนวนคนต้องไม่เกินความจุห้อง (${room.capacity} คน)`);
+    } else if (num < 1) {
+      setAttendees("1");
+      setAttendeesError("");
+    } else {
+      setAttendees(num.toString());
+      setAttendeesError("");
+    }
   };
 
   const handleSubmit = async () => {
@@ -151,7 +176,11 @@ export default function BookingConfirmPage() {
       alert("ไม่สามารถจองนอกเวลาทำการ หรือช่วงพักเที่ยงได้");
       return;
     }
-    if (!purpose || !attendees) {
+
+    // 🌟 เลือกใช้ค่า finalPurpose (ถ้าเลือก 'other' ให้เอาข้อความที่พิมพ์มาใช้แทน)
+    const finalPurpose = purpose === "other" ? otherPurpose : purpose;
+
+    if (!finalPurpose || !attendees) {
       alert("กรุณากรอกข้อมูลที่จำเป็น (*) ให้ครบถ้วน");
       return;
     }
@@ -174,8 +203,8 @@ export default function BookingConfirmPage() {
           room_id: parseInt(roomId),
           start_time: startISO,
           end_time: endISO,
-          title: purpose,
-          purpose: purpose,
+          title: finalPurpose,   // 🌟 บันทึกค่าวัตถุประสงค์ที่แท้จริงลง Database
+          purpose: finalPurpose, // 🌟 บันทึกค่าวัตถุประสงค์ที่แท้จริงลง Database
           status: 'pending',
           attendees_count: parseInt(attendees) || 0,
           advisor: advisor,
@@ -185,7 +214,7 @@ export default function BookingConfirmPage() {
       if (error) throw error;
 
       alert("จองห้องสำเร็จ! กรุณารอการอนุมัติ");
-      router.push('/schedule');
+      router.push('/history'); 
 
     } catch (err: any) {
       console.error(err);
@@ -238,7 +267,7 @@ export default function BookingConfirmPage() {
             <div className="img-overlay"></div>
             <div className="pc-count">
               <span className="material-symbols-outlined" style={{fontSize:16}}>desktop_windows</span>
-              {room?.capacity} เครื่อง
+              {room?.capacity} เครื่อง (รองรับได้สูงสุด {room?.capacity} คน)
             </div>
           </div>
         </section>
@@ -296,25 +325,58 @@ export default function BookingConfirmPage() {
           </div>
           
           <div className="form-card">
+            
+            {/* 🌟 ปรับปรุงส่วนเลือกวัตถุประสงค์ */}
             <div className="form-group">
               <label>วัตถุประสงค์ <span className="req">*</span></label>
-              <select className="form-select" value={purpose} onChange={(e) => setPurpose(e.target.value)}>
+              {/* ผมเปลี่ยน value ภาษาไทย เพื่อให้เวลาบันทึกลง Database มันเป็นคำภาษาไทยสวยๆ ครับ */}
+              <select className="form-select" value={purpose} onChange={(e) => {
+                setPurpose(e.target.value);
+                if (e.target.value !== "other") setOtherPurpose(""); // เคลียร์ค่าที่พิมพ์หากเปลี่ยนกลับไปเลือกตัวเลือกปกติ
+              }}>
                 <option value="" disabled>เลือกวัตถุประสงค์</option>
-                <option value="study">การเรียนการสอน (Class)</option>
-                <option value="group">ติวหนังสือ / ทำงานกลุ่ม</option>
-                <option value="club">กิจกรรมชมรม</option>
-                <option value="other">อื่นๆ</option>
+                <option value="การเรียนการสอน (Class)">การเรียนการสอน (Class)</option>
+                <option value="ติวหนังสือ / ทำงานกลุ่ม">ติวหนังสือ / ทำงานกลุ่ม</option>
+                <option value="กิจกรรมชมรม">กิจกรรมชมรม</option>
+                <option value="other">อื่นๆ (โปรดระบุ)</option>
               </select>
+
+              {/* 🌟 ถ้าเลือก "อื่นๆ" ให้โชว์ช่องกรอกข้อความนี้ขึ้นมา */}
+              {purpose === "other" && (
+                <div style={{ marginTop: '8px' }}>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="โปรดระบุวัตถุประสงค์ของคุณ..." 
+                    value={otherPurpose}
+                    onChange={(e) => setOtherPurpose(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+              )}
             </div>
 
             <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px'}}>
               <div className="form-group">
                 <label>จำนวนคน <span className="req">*</span></label>
-                <input type="number" className="form-input" placeholder="0" value={attendees} onChange={(e) => setAttendees(e.target.value)} />
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  placeholder={`สูงสุด ${room?.capacity || 0} คน`} 
+                  value={attendees} 
+                  onChange={handleAttendeesChange} 
+                  min="1"
+                  max={room?.capacity}
+                />
+                {attendeesError && (
+                  <p style={{color: '#dc2626', fontSize: '11px', marginTop: '4px', lineHeight: '1.2'}}>
+                    {attendeesError}
+                  </p>
+                )}
               </div>
               <div className="form-group">
                 <label>รหัสนักศึกษา</label>
-                <input type="text" className="form-input" value={userProfile?.student_id || "-"} readOnly />
+                <input type="text" className="form-input" value={userProfile?.student_id || "-"} readOnly style={{backgroundColor: '#f8fafc', color: '#64748b'}} />
               </div>
             </div>
 

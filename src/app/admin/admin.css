@@ -713,3 +713,94 @@ input, select, textarea { font-family: inherit; outline: none; -webkit-appearanc
   50% { opacity: 0.6; }
   100% { opacity: 1; }
 }
+
+/* ========================================
+   💻 ADMIN RESPONSIVE DESKTOP FIX (แบบเต็มจอ 100%)
+   ======================================== */
+
+@media (min-width: 768px) {
+  body {
+    background-color: var(--bg-light); /* ให้สีพื้นหลังกลืนไปกับหน้าเว็บเลย */
+  }
+
+  /* 1. ปลดล็อคขนาดให้กางเต็ม 100% ไร้ขอบ */
+  .admin-container {
+    max-width: 100% !important; /* <--- หัวใจสำคัญคือตรงนี้ */
+    width: 100%;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+    min-height: 100vh;
+  }
+
+  /* 2. ขยายแถบเมนูด้านล่างให้ยาวสุดขอบจอ */
+  .admin-sidebar {
+    max-width: 100% !important;
+    border-radius: 0;
+    bottom: 0 !important; 
+  }
+
+  /* 🌟 เพิ่ม Padding ซ้าย-ขวา ให้เนื้อหาไม่ชิดขอบจอคอมจนเกินไป */
+  .admin-content {
+    padding: 40px 5% calc(var(--nav-height) + 40px);
+  }
+
+  /* 3. ปรับ Layout ส่วนของหน้าจัดการต่างๆ ให้แสดงเป็น Grid (หลายคอลัมน์) */
+  
+  /* --> การ์ดห้อง (Room List) */
+  .room-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .room-card-item {
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .room-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .room-card-actions {
+    margin-top: auto;
+  }
+
+  /* --> การ์ดผู้ใช้งาน (User List) */
+  .user-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  /* --> การ์ดคำขอจองห้อง (Booking List) */
+  .booking-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+  }
+  .booking-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .booking-card-actions {
+    margin-top: auto; /* ดันปุ่มอนุมัติ/ปฏิเสธ ลงไปชิดขอบล่างเสมอ */
+  }
+
+  /* ปรับแบบฟอร์มเพิ่มข้อมูลให้ดูไม่อึดอัดบนจอคอม */
+  .admin-form-card {
+    padding: 40px;
+    max-width: 800px; /* 🌟 ล็อกฟอร์มไว้แค่นี้ จะได้ไม่ยาวยืดจนพิมพ์ยาก */
+    margin: 0 auto;   /* จัดฟอร์มให้อยู่กึ่งกลางจอ */
+  }
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+    display: grid;
+  }
+  /* ให้ปุ่มบันทึกยืดเต็มบรรทัดล่าง */
+  .btn-primary {
+    grid-column: span 2;
+  }
+}

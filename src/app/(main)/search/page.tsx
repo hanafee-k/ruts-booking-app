@@ -17,18 +17,35 @@ interface Room {
   status: 'active' | 'maintenance';
 }
 
+// ✅ Helper ฟังก์ชันสำหรับแปลงชื่อสิ่งอำนวยความสะดวกเป็นไอคอน (รองรับทั้ง EN และ TH)
+const getFacilityIcon = (fac: string) => {
+  const key = fac.toLowerCase();
+  if (key.includes('wifi') || key.includes('ไวไฟ') || key.includes('เน็ต')) return 'wifi';
+  if (key.includes('projector') || key.includes('โปรเจคเตอร์')) return 'videocam';
+  if (key.includes('power') || key.includes('ปลั๊ก') || key.includes('ไฟ')) return 'power';
+  if (key.includes('whiteboard') || key.includes('กระดาน') || key.includes('ไวท์บอร์ด')) return 'developer_board';
+  if (key.includes('computer') || key.includes('คอม')) return 'desktop_windows';
+  if (key.includes('aircon') || key.includes('แอร์') || key.includes('อากาศ')) return 'ac_unit';
+  
+  return 'check_circle'; // ไอคอนเริ่มต้นถ้าหาไม่เจอ
+};
+
+// ฟังก์ชันดึงวันที่ปัจจุบันแบบเวลาไทย (แก้บัค Hydration)
+const getLocalDateString = () => {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().split('T')[0];
+};
+
 function SearchContent() {
   const router = useRouter();
   const supabase = createClient();
   const searchParams = useSearchParams();
   
-  // ✅ 1. รับค่าวันที่และเวลาจาก URL
   const autoTime = searchParams.get('autoTime');
   const autoDate = searchParams.get('date');
 
-  // Ref สำหรับ Input
-  const dateInputRef = useRef<HTMLInputElement>(null);
-  const timeInputRef = useRef<HTMLInputElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   // --- States ---
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -36,8 +53,7 @@ function SearchContent() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ✅ 2. ตั้งค่าเริ่มต้น: ถ้ามี autoDate ให้ใช้ก่อน ถ้าไม่มีใช้วันปัจจุบัน
-  const [date, setDate] = useState(autoDate || new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(autoDate || "");
   const [startTime, setStartTime] = useState(autoTime || "09:00");
   
   // Filters
@@ -45,6 +61,15 @@ function SearchContent() {
   const [filterProjector, setFilterProjector] = useState(false);
   const [filterPower, setFilterPower] = useState(false);
   const [filterLarge, setFilterLarge] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    if (!autoDate) {
+      setDate(getLocalDateString());
+    } else {
+      setDate(autoDate);
+    }
+  }, [autoDate]);
 
   // --- 1. ดึงข้อมูล "ห้องทั้งหมด" ---
   useEffect(() => {
@@ -69,6 +94,7 @@ function SearchContent() {
 
   // --- 2. ดึงข้อมูล "การจอง" ตามวันที่เลือก ---
   useEffect(() => {
+    if (!date) return;
     const fetchBookings = async () => {
       const { data } = await supabase
         .from('bookings')
@@ -84,6 +110,7 @@ function SearchContent() {
 
   // --- Logic เช็คห้องว่าง ---
   const checkIsRoomFree = (roomId: number) => {
+    if (!date) return true;
     const endHour = parseInt(startTime.split(':')[0]) + 3; 
     const endTimeStr = `${endHour.toString().padStart(2, '0')}:${startTime.split(':')[1]}`;
     
@@ -112,8 +139,12 @@ function SearchContent() {
 
     if (filterAvailable && !isAvailable) return false;
     
-    if (filterProjector && !room.facilities?.includes('projector')) return false;
-    if (filterPower && !room.facilities?.includes('power')) return false;
+    // ดักจับฟิลเตอร์ตามชื่อที่อาจเซฟไว้ใน DB
+    const hasFac = (facList: string[], keyword: string) => 
+      facList?.some(f => f.toLowerCase().includes(keyword));
+
+    if (filterProjector && !hasFac(room.facilities, 'projector') && !hasFac(room.facilities, 'โปรเจคเตอร์')) return false;
+    if (filterPower && !hasFac(room.facilities, 'power') && !hasFac(room.facilities, 'ปลั๊ก')) return false;
     if (filterLarge && room.capacity < 40) return false;
 
     return matchName;
@@ -127,6 +158,22 @@ function SearchContent() {
 
   return (
     <div className="search-page">
+      {/* 🌟 CSS ยืดไอคอนปฏิทินให้เต็มกล่อง ห้ามใช้ display: none เด็ดขาด */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .ultimate-hidden-input {
+          position: absolute !important; top: 0 !important; left: 0 !important;
+          width: 100% !important; height: 100% !important; opacity: 0 !important; 
+          z-index: 50 !important; cursor: pointer !important;
+          color: transparent !important; background: transparent !important; border: none !important;
+        }
+        .ultimate-hidden-input::-webkit-calendar-picker-indicator {
+          position: absolute !important; top: 0 !important; left: 0 !important;
+          width: 100% !important; height: 100% !important;
+          margin: 0 !important; padding: 0 !important;
+          cursor: pointer !important; opacity: 0 !important;
+        }
+      `}} />
+
       <header className="modern-header">
         <div className="header-top">
           <div className="header-title">
@@ -138,49 +185,33 @@ function SearchContent() {
         </div>
 
         <div className="inputs-grid">
-          {/* วันที่: กดแล้วเปิดปฏิทิน */}
-          <div 
-            className="smart-input active"
-            onClick={() => dateInputRef.current?.showPicker()}
-            style={{cursor: 'pointer'}}
-          >
-            <div className="input-visual">
+          
+          <div className="smart-input active" style={{ position: 'relative', overflow: 'hidden' }}>
+            <div className="input-visual" style={{ pointerEvents: 'none' }}>
               <span className="material-symbols-outlined input-icon">calendar_month</span>
               <div className="input-labels">
                 <span className="input-label-small">วันที่</span>
-                <span className="input-value">{formatDateDisplay(date)}</span>
+                <span className="input-value">{isMounted ? formatDateDisplay(date) : "กำลังโหลด..."}</span>
               </div>
             </div>
-            <input 
-              ref={dateInputRef}
-              type="date" 
-              className="real-input"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            {isMounted && (
+              <input type="date" className="ultimate-hidden-input" value={date} onChange={(e) => setDate(e.target.value)} />
+            )}
           </div>
 
-          {/* เวลา: กดแล้วเปิดนาฬิกา */}
-          <div 
-            className="smart-input"
-            onClick={() => timeInputRef.current?.showPicker()}
-            style={{cursor: 'pointer'}}
-          >
-            <div className="input-visual">
+          <div className="smart-input" style={{ position: 'relative', overflow: 'hidden' }}>
+            <div className="input-visual" style={{ pointerEvents: 'none' }}>
               <span className="material-symbols-outlined input-icon">schedule</span>
               <div className="input-labels">
                 <span className="input-label-small">เวลาเริ่ม</span>
-                <span className="input-value">{startTime}</span>
+                <span className="input-value">{isMounted ? startTime : "--:--"}</span>
               </div>
             </div>
-            <input 
-              ref={timeInputRef}
-              type="time" 
-              className="real-input"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-            />
+            {isMounted && (
+              <input type="time" className="ultimate-hidden-input" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+            )}
           </div>
+
         </div>
 
         <div className="search-bar">
@@ -206,62 +237,79 @@ function SearchContent() {
           <h3>ผลลัพธ์ ({filteredRooms.length})</h3>
         </div>
 
-        {loading ? (
+        {!isMounted || loading ? (
           <div style={{textAlign:'center', padding:'40px', color:'#94a3b8'}}>กำลังโหลดข้อมูล...</div>
         ) : filteredRooms.length > 0 ? (
-          filteredRooms.map(room => {
-             const isMaintenance = room.status === 'maintenance';
-             const isTimeFree = checkIsRoomFree(room.id);
-             const isAvailable = !isMaintenance && isTimeFree;
+          
+          /* 🌟 Wrapper จัด Grid สำหรับ Desktop */
+          <div className="results-grid">
+            
+            {filteredRooms.map(room => {
+               const isMaintenance = room.status === 'maintenance';
+               const isTimeFree = checkIsRoomFree(room.id);
+               const isAvailable = !isMaintenance && isTimeFree;
 
-             return (
-              <div key={room.id} className="modern-card">
-                <div className="card-image" style={{backgroundImage: `url(${room.image_url || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800'})`}}>
-                  <div className="status-float">
-                    <div className={`dot ${isAvailable ? 'green' : 'red'}`}></div>
-                    <span>{isMaintenance ? 'ปิดปรับปรุง' : (isAvailable ? 'ว่าง' : 'ไม่ว่าง')}</span>
-                  </div>
-                </div>
-
-                <div className="card-body">
-                  <div className="card-title-row">
-                    <div>
-                      <div className="room-name">{room.name}</div>
-                      <div className="room-detail">{room.building || "อาคารเรียนรวม"} • {room.capacity} ที่นั่ง</div>
-                    </div>
-                    <div style={{display:'flex', gap:'2px', color:'#FFB81C'}}>
-                       <span className="material-symbols-outlined" style={{fontSize:18, fontVariationSettings:"'FILL' 1"}}>star</span>
-                       <span style={{fontSize:14, fontWeight:700, color:'#1e293b'}}>4.8</span>
+               return (
+                <div key={room.id} className="modern-card">
+                  
+                  {/* โค้ดห้องที่ถูกเติมกลับมาครบถ้วน! */}
+                  <div className="card-image" style={{backgroundImage: `url(${room.image_url || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800'})`}}>
+                    <div className="status-float">
+                      <div className={`dot ${isAvailable ? 'green' : 'red'}`}></div>
+                      <span>{isMaintenance ? 'ปิดปรับปรุง' : (isAvailable ? 'ว่าง' : 'ไม่ว่าง')}</span>
                     </div>
                   </div>
 
-                  <div className="facilities">
-                    {room.facilities?.map((fac: string) => (
-                      <span key={fac} className="material-symbols-outlined fac-icon">
-                        {fac === 'projector' ? 'videocam' : fac === 'power' ? 'power' : 'wifi'}
-                      </span>
-                    ))}
-                  </div>
+                  <div className="card-body">
+                    <div className="card-title-row">
+                      <div>
+                        <div className="room-name">{room.name}</div>
+                        <div className="room-detail">{room.building || "อาคารเรียนรวม"} • {room.capacity} ที่นั่ง</div>
+                      </div>
+                      <div style={{display:'flex', gap:'2px', color:'#FFB81C'}}>
+                         <span className="material-symbols-outlined" style={{fontSize:18, fontVariationSettings:"'FILL' 1"}}>star</span>
+                         <span style={{fontSize:14, fontWeight:700, color:'#1e293b'}}>4.8</span>
+                      </div>
+                    </div>
 
-                  {isAvailable ? (
-                    <button 
-                      className="btn-action"
-                      onClick={() => {
-                        router.push(`/booking/${room.id}?date=${date}&startTime=${startTime}`);
-                      }}
-                    >
-                      <span>จองห้องนี้</span>
-                      <span className="material-symbols-outlined" style={{fontSize:18}}>arrow_forward</span>
-                    </button>
-                  ) : (
-                    <button className="btn-action" disabled>
-                      {isMaintenance ? 'อยู่ระหว่างปรับปรุง' : 'ไม่ว่างในช่วงเวลานี้'}
-                    </button>
-                  )}
+                    <div className="facilities">
+                      {room.facilities && room.facilities.length > 0 ? (
+                        room.facilities.map((fac: string) => (
+                          <span 
+                            key={fac} 
+                            className="material-symbols-outlined fac-icon" 
+                            title={fac} 
+                          >
+                            {getFacilityIcon(fac)}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="room-detail" style={{ fontSize: '0.75rem' }}>ไม่มีข้อมูลสิ่งอำนวยความสะดวก</span>
+                      )}
+                    </div>
+
+                    {isAvailable ? (
+                      <button 
+                        className="btn-action"
+                        onClick={() => {
+                          router.push(`/booking/${room.id}?date=${date}&startTime=${startTime}`);
+                        }}
+                      >
+                        <span>จองห้องนี้</span>
+                        <span className="material-symbols-outlined" style={{fontSize:18}}>arrow_forward</span>
+                      </button>
+                    ) : (
+                      <button className="btn-action" disabled>
+                        {isMaintenance ? 'อยู่ระหว่างปรับปรุง' : 'ไม่ว่างในช่วงเวลานี้'}
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-             );
-          })
+               );
+            })}
+            
+          </div>
+
         ) : (
           <div style={{textAlign:'center', padding:'40px', color:'#94a3b8'}}>
             <span className="material-symbols-outlined" style={{fontSize:48, marginBottom:8}}>search_off</span>

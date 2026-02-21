@@ -329,3 +329,54 @@
   color: #94a3b8;
   cursor: not-allowed;
 }
+
+/* ========================================
+   💻 ปรับ Layout หน้าค้นหาสำหรับหน้าจอคอม (Desktop Grid)
+   ======================================== */
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* 📱 บนมือถือแสดง 1 คอลัมน์ (บนสุด-ล่างสุด) ตามปกติ */
+  gap: 20px;
+}
+
+.results-grid .modern-card {
+  margin-bottom: 0; /* เอา margin เดิมออก เพราะเราใช้ gap ของ grid ในการเว้นช่องว่างแล้ว */
+  display: flex;
+  flex-direction: column; 
+  height: 100%; /* ให้การ์ดทุกใบในแถวเดียวกันสูงเท่ากัน */
+}
+
+.results-grid .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.results-grid .btn-action {
+  margin-top: auto; /* ดันปุ่ม "จองห้องนี้" ลงไปอยู่ขอบล่างเสมอ (เผื่อชื่อห้องยาวสั้นไม่เท่ากัน) */
+}
+
+/* 🌟 เมื่อหน้าจอกว้างขึ้น (แท็บเล็ต / คอมพิวเตอร์) */
+@media (min-width: 768px) {
+  .results-grid {
+    /* เวทมนตร์อยู่ตรงนี้: จัดเรียงอัตโนมัติ การ์ดกว้างขั้นต่ำ 300px ถ้ามีที่เหลือก็แบ่งคอลัมน์เพิ่ม (เป็น 2, 3 หรือ 4 คอลัมน์) */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  /* ปรับขอบซ้ายขวาของเนื้อหาบนคอมให้ดูโปร่งขึ้น ไม่อึดอัด */
+  .content-area {
+    padding: 24px 40px; 
+  }
+  
+  .modern-header {
+    padding: 24px 40px 16px;
+  }
+
+  /* ปรับช่อง "วันที่" กับ "เวลา" ไม่ให้ยืดกว้างเกินไปบนจอคอม */
+  .inputs-grid {
+     grid-template-columns: 300px 300px;
+     justify-content: start;
+  }
+}

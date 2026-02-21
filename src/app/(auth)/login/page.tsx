@@ -28,7 +28,6 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // 1. Login
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -36,9 +35,7 @@ export default function LoginPage() {
 
       if (authError) throw authError;
 
-      // ✅ 2. เช็ค Role (แบบปลอดภัย)
       if (data.user) {
-        // ใช้ maybeSingle() แทน single() เพื่อไม่ให้ Error ถ้าระบบหาไม่เจอ
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('role')
@@ -47,12 +44,10 @@ export default function LoginPage() {
 
         if (profileError) {
             console.error("Profile Error:", profileError.message);
-            // ถ้า Error เรื่อง Schema ให้ถือว่าเป็น User ธรรมดาไปก่อน กันค้าง
             router.push("/dashboard");
             return;
         }
 
-        // ตรวจสอบ Role
         if (profile?.role === 'admin') {
             router.push("/admin/dashboard");
         } else {
@@ -62,29 +57,26 @@ export default function LoginPage() {
 
     } catch (err: any) {
       console.error("Login Error:", err);
-      setError(err.message || "เข้าสู่ระบบไม่สำเร็จ");
+      setError(err.message || "เข้าสู่ระบบไม่สำเร็จ หรือรหัสผ่านไม่ถูกต้อง");
       setIsLoading(false);
     } 
   };
   
   return (
     <div className="login-container">
-      {/* Hero Section */}
+      {/* ================= HERO SECTION ================= */}
       <div className="login-hero">
         <div className="hero-gradient">
           <div className="hero-pattern"></div>
           <div className="hero-overlay">
-            <div className="hero-bg"></div>
+            {/* 🌟 เปลี่ยน URL รูปตรงนี้เป็นรูปมหาลัยสวยๆ ได้เลยครับ */}
+            <div className="hero-bg" style={{ backgroundImage: 'url("https://www.rmutsv.ac.th/ruts/wp-content/uploads/2023/05/bg1-Large.jpeg")' }}></div>
           </div>
           <div className="hero-glow"></div>
         </div>
 
         <div className="hero-header">
-          <button
-            onClick={() => router.back()}
-            className="btn-back"
-            aria-label="ย้อนกลับ"
-          >
+          <button onClick={() => router.back()} className="btn-back" aria-label="ย้อนกลับ">
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
         </div>
@@ -99,11 +91,16 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Form Section */}
+      {/* ================= FORM SECTION ================= */}
       <div className="login-form-wrapper">
         <div className="login-form-card">
+          
+          <div className="form-header-mobile">
+             <h2>เข้าสู่ระบบ</h2>
+             <p>กรุณากรอกอีเมลและรหัสผ่านของคุณ</p>
+          </div>
+
           <form onSubmit={handleLogin} className="login-form">
-            {/* Error Message */}
             {error && (
               <div className="error-message">
                 <span className="material-symbols-outlined">error</span>
@@ -113,18 +110,14 @@ export default function LoginPage() {
 
             {/* Email Field */}
             <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                อีเมล
-              </label>
+              <label htmlFor="email" className="form-label">อีเมล</label>
               <div className="form-input-wrapper">
-                <span className="input-icon material-symbols-outlined">
-                  badge
-                </span>
+                <span className="input-icon material-symbols-outlined">mail</span>
                 <input
                   id="email"
-                  type="text"
+                  type="email"
                   className="form-input"
-                  placeholder="example@gmail.com"
+                  placeholder="student@rmutsv.ac.th"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
@@ -135,17 +128,15 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className="form-group">
-              <label htmlFor="password" className="form-label">
-                รหัสผ่าน
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                 <label htmlFor="password" className="form-label">รหัสผ่าน</label>
+                 <a href="#" className="forgot-password-link">ลืมรหัสผ่าน?</a>
+              </div>
               <div className="form-input-wrapper">
-                <span className="input-icon material-symbols-outlined">
-                  lock
-                </span>
+                <span className="input-icon material-symbols-outlined">lock</span>
                 <input
                   id="password"
-                  type="password" // แก้กลับเป็น password ปกติ (showPassword state ค่อยคุม type)
-                  // หรือใช้ logic เดิม: type={showPassword ? "text" : "password"}
+                  type={showPassword ? "text" : "password"} // 🌟 ใช้ State คุมการซ่อน/โชว์รหัส
                   className="form-input"
                   placeholder="••••••••"
                   value={password}
@@ -153,34 +144,34 @@ export default function LoginPage() {
                   disabled={isLoading}
                   autoComplete="current-password"
                 />
-                {/* (ปุ่ม Show Password เดิมของคุณ ถ้ามีก็ใส่ไว้ได้เลยครับ) */}
+                
+                {/* 🌟 ปุ่มตา เปิด-ปิด รหัสผ่าน */}
+                <button 
+                  type="button" 
+                  className="toggle-password" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  <span className="material-symbols-outlined">
+                    {showPassword ? "visibility_off" : "visibility"}
+                  </span>
+                </button>
               </div>
             </div>
 
-            {/* Forgot Password */}
-            <div className="forgot-password-wrapper">
-              <a href="#" className="forgot-password-link">
-                ลืมรหัสผ่าน?
-              </a>
-            </div>
-
             {/* Login Button */}
-            <button
-              type="submit"
-              className="btn-login"
-              disabled={isLoading}
-            >
+            <button type="submit" className="btn-login" disabled={isLoading}>
               <div className="btn-shine"></div>
               <span>{isLoading ? "กำลังตรวจสอบ..." : "เข้าสู่ระบบ"}</span>
               <span className="material-symbols-outlined">
-                {isLoading ? "hourglass_empty" : "login"}
+                {isLoading ? "hourglass_empty" : "arrow_forward"}
               </span>
             </button>
 
             {/* Divider */}
             <div className="divider">
               <div className="divider-line"></div>
-              <span className="divider-text">หรือ</span>
+              <span className="divider-text">นักศึกษาใหม่?</span>
             </div>
 
             {/* Register Button */}
@@ -191,18 +182,15 @@ export default function LoginPage() {
               disabled={isLoading}
             >
               <span className="material-symbols-outlined">person_add</span>
-              <span>สมัครสมาชิกใหม่</span>
+              <span>สร้างบัญชีผู้ใช้งาน</span>
             </button>
           </form>
 
           {/* Footer */}
           <div className="login-footer">
-            <p>
-              © 2024 RUTS Computer Engineering.
-              <br />
-              All rights reserved.
-            </p>
+            <p>© 2024 RUTS Computer Engineering.<br />All rights reserved.</p>
           </div>
+
         </div>
       </div>
     </div>

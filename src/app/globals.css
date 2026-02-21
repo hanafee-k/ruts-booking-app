@@ -91,12 +91,11 @@ input, textarea, select {
   border: none;
   outline: none;
   
-  /* ⭐ เพิ่ม 3 บรรทัดนี้ เพื่อล้างค่าเดิมของ Browser ทิ้งให้หมดครับ */
+  /* ⭐ ล้างค่าเดิมของ Browser ทิ้งให้หมด */
   background-color: transparent; 
   -webkit-appearance: none;
   appearance: none;
 }
-
 
 a {
   color: inherit;
@@ -145,11 +144,10 @@ img {
 }
 
 /* ========================================
-   🔥 GLOBAL APP-SHELL FIX
-   จัดแอปให้อยู่กึ่งกลางจอ และมีความกว้างเท่ามือถือ
+   🔥 GLOBAL APP-SHELL FIX (Responsive)
    ======================================== */
 
-/* รวบรวม Class ของทุกหน้ามาบังคับขนาด */
+/* โครงสร้างหลัก - ค่าเริ่มต้นบนจอเล็ก/กลาง */
 .login-container,
 .dashboard-container,
 .profile-page,
@@ -165,33 +163,34 @@ img {
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow-x: hidden;
+  transition: all 0.3s ease; /* ทำให้สมูทเวลาเปลี่ยนขนาดจอ */
 }
 
-/* แก้ไข Header/Footer ที่เป็น Fixed/Sticky ให้ไม่ล้นจอคอม */
+/* Fixed Elements - ค่าเริ่มต้น */
 .bottom-nav,
 .sticky-header,
 .booking-header,
 .booking-footer,
 .dashboard-header,
-.top-bar,
-.fab-add {
-  max-width: 480px !important;
+.top-bar {
   width: 100%;
+  max-width: 480px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   right: auto !important;
+  transition: all 0.3s ease;
 }
 
-/* แก้ไขปุ่ม FAB (ปุ่มบวก) ให้ตำแหน่งเป๊ะ */
+/* ปุ่ม FAB - ค่าเริ่มต้น */
 .fab-add {
-  width: 56px;
+  max-width: 480px !important;
   left: calc(50% + 240px - 24px - 56px) !important;
   transform: none !important;
   bottom: 100px;
 }
 
 /* ========================================
-   RESPONSIVE (มือถือจริง)
+   📱 RESPONSIVE (มือถือขนาดจริง <= 480px)
    ======================================== */
 @media (max-width: 480px) {
   body {
@@ -216,3 +215,49 @@ img {
   }
 }
 
+/* 💻 ===================================
+   RESPONSIVE (จอคอมพิวเตอร์ >= 768px) - แบบเต็มจอ 100%
+   =================================== */
+@media (min-width: 768px) {
+  body {
+    background-color: var(--bg-light); /* ให้สีพื้นหลังกลืนไปกับแอปเลย */
+  }
+
+  /* 🌟 ปลดล็อคความกว้างให้กางเต็ม 100% */
+  .login-container,
+  .dashboard-container,
+  .profile-page,
+  .booking-page,
+  .schedule-page,
+  .search-page,
+  .main-container {
+    max-width: 100% !important; /* <--- หัวใจสำคัญคือตรงนี้ครับ */
+    border-radius: 0; /* เอาขอบมนออกให้ติดขอบจอ */
+    margin: 0; /* เอาช่องว่างออก */
+    min-height: 100vh;
+    box-shadow: none;
+  }
+
+  /* 🌟 ขยายแถบนำทางและ Header ให้ยาวสุดขอบจอ */
+  .bottom-nav,
+  .sticky-header,
+  .booking-header,
+  .booking-footer,
+  .dashboard-header,
+  .top-bar {
+    max-width: 100% !important;
+  }
+
+  /* เอาขอบมนของ Bottom Nav ออก และให้ชิดขอบล่างสุด */
+  .bottom-nav {
+    border-radius: 0;
+    bottom: 0 !important; 
+  }
+
+  /* ปรับตำแหน่งปุ่มบวก (FAB) ให้อิงจากมุมขวาล่างของหน้าจอ */
+  .fab-add {
+    left: auto !important;
+    right: 40px !important; /* ห่างจากขอบจอขวา 40px */
+    bottom: 100px;
+  }
+}

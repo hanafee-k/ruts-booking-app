@@ -7,15 +7,10 @@ import BottomNav from "@/components/layout/BottomNav";
 import "./schedule.css";
 
 // Helper Functions
-const getDayName = (date: Date) => {
-  return date.toLocaleDateString('th-TH', { weekday: 'long' });
-};
-
 const formatTime = (isoString: string) => {
   return new Date(isoString).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 };
 
-// Helper สำหรับแปลงวันที่ให้ตรงกับ Input (YYYY-MM-DD)
 const formatDateForInput = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -23,69 +18,83 @@ const formatDateForInput = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
+// 🌟 ฟังก์ชันหา 7 วันในสัปดาห์ (เริ่มวันจันทร์ - จบวันอาทิตย์)
+const getWeekDays = (date: Date) => {
+  const current = new Date(date);
+  const day = current.getDay();
+  const diff = current.getDate() - day + (day === 0 ? -6 : 1); // ปรับให้เริ่มวันจันทร์
+  const monday = new Date(current.setDate(diff));
+  
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+      const nextDay = new Date(monday);
+      nextDay.setDate(monday.getDate() + i);
+      days.push(nextDay);
+  }
+  return days;
+};
+
 export default function SchedulePage() {
   const router = useRouter();
   const supabase = createClient();
-  
-  // Ref สำหรับปฏิทิน
   const dateInputRef = useRef<HTMLInputElement>(null);
 
-  // State
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [allBookings, setAllBookings] = useState<any[]>([]); // 🌟 เปลี่ยนมาเก็บการจองทั้งหมด
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
 
-  // Loop เวลาทำงาน 08:00 - 17:00
   const timeSlots = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
-  // ดึงข้อมูลจาก Supabase
+  // ดึงข้อมูลการจองทั้งหมด (หรือในเดือนนั้นๆ)
   useEffect(() => {
     const fetchBookings = async () => {
       setLoading(true);
-
       const { data, error } = await supabase
         .from('bookings')
         .select(`*, rooms ( name, building )`)
         .order('start_time', { ascending: true });
 
       if (data) {
-        // Filter เฉพาะวันที่เลือก
-        const filtered = data.filter((booking: any) => {
-            const bookingDate = new Date(booking.start_time).toDateString();
-            const filterDate = selectedDate.toDateString();
-            return bookingDate === filterDate;
-        });
-        setBookings(filtered);
+        setAllBookings(data); // เก็บทั้งหมดไว้ใน State
       }
-      
       setLoading(false);
     };
-
     fetchBookings();
-  }, [selectedDate, supabase]);
+  }, [supabase]);
 
-  // หา Booking หลายตัว และเช็คช่วงเวลา (Duration)
+  // 🌟 ฟังก์ชันดึงการจองสำหรับ "หน้ารายวัน" (ต้องเช็ควันที่ให้ตรงด้วย)
   const getBookingsForSlot = (slotTimeStr: string) => {
      const slotHour = parseInt(slotTimeStr.split(':')[0]); 
+     return allBookings.filter(b => {
+        const bDate = new Date(b.start_time);
+        // เช็คว่าตรงกับวันที่เลือกไหม
+        if (bDate.toDateString() !== selectedDate.toDateString()) return false;
 
-     return bookings.filter(b => {
-        const startHour = new Date(b.start_time).getHours();
+        const startHour = bDate.getHours();
         const endHour = new Date(b.end_time).getHours();
         return slotHour >= startHour && slotHour < endHour;
      });
   };
 
-  // ฟังก์ชันกำหนดสถานะ
+  // 🌟 ฟังก์ชันดึงการจองสำหรับ "หน้ารายสัปดาห์" (ดึงของวันนั้นๆ)
+  const getBookingsForDate = (targetDate: Date) => {
+    return allBookings.filter(b => {
+       const bDate = new Date(b.start_time);
+       return bDate.toDateString() === targetDate.toDateString();
+    });
+  }
+
   const getStatus = (booking: any) => {
     const now = new Date();
     const start = new Date(booking.start_time);
     const end = new Date(booking.end_time);
-
     if (now >= start && now <= end) return "IN PROGRESS";
     if (now < start) return "UPCOMING";
     return "CONFIRMED";
   };
+
+  const weekDays = getWeekDays(selectedDate);
 
   return (
     <div className="schedule-page">
@@ -108,15 +117,15 @@ export default function SchedulePage() {
 
       {/* 2. Toggle View */}
       <div className="section-container">
-        <div className="view-toggle">
+        <div className="view-toggle-wrapper">
           <button 
-            className={`toggle-btn ${viewMode === 'daily' ? 'active' : ''}`}
+            className={`toggle-btn ${viewMode === 'daily' ? 'active' : ''}`} 
             onClick={() => setViewMode('daily')}
           >
             รายวัน
           </button>
           <button 
-            className={`toggle-btn ${viewMode === 'weekly' ? 'active' : ''}`}
+            className={`toggle-btn ${viewMode === 'weekly' ? 'active' : ''}`} 
             onClick={() => setViewMode('weekly')}
           >
             รายสัปดาห์
@@ -124,72 +133,35 @@ export default function SchedulePage() {
         </div>
       </div>
 
-     {/* 3. Date Selection (แก้ใหม่: ใช้ CSS Trick บังคับปฏิทินเด้ง 100%) */}
+     {/* 3. Date Selection */}
       <div className="section-container" style={{marginTop: '16px'}}>
-        
-        {/* 🔥 ท่าไม้ตาย: CSS ขยายปุ่มกดปฏิทิน (Indicator) ให้เต็มกล่อง 100% */}
         <style>{`
           .date-overlay::-webkit-calendar-picker-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            cursor: pointer;
-            opacity: 0; /* ซ่อนไอคอนเดิมไว้ */
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            margin: 0; padding: 0; cursor: pointer; opacity: 0;
           }
         `}</style>
-
-        <div 
-          style={{
-            position: 'relative',
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '16px',
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-            overflow: 'hidden'
-          }}
-        >
-           {/* UI ด้านหน้า (แสดงผลสวยๆ) */}
-           <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
-              <div style={{
-                  width:'40px', height:'40px', 
-                  background:'#f1f5f9', borderRadius:'10px', 
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                  color:'#002855'
-              }}>
+        <div className="date-picker-card">
+           <div className="date-display">
+              <div className="date-icon-box">
                  <span className="material-symbols-outlined">calendar_month</span>
               </div>
-              <div style={{display:'flex', flexDirection:'column'}}>
-                 <span style={{fontSize:'0.75rem', color:'#64748b', fontWeight:600}}>วันที่ต้องการดู</span>
-                 <span style={{fontSize:'1rem', color:'#0f172a', fontWeight:700}}>
-                    {selectedDate.toLocaleDateString('th-TH', { dateStyle: 'long' })}
+              <div className="date-text">
+                 <span className="date-label">
+                   {viewMode === 'daily' ? 'วันที่ต้องการดู' : 'สัปดาห์ที่ต้องการดู'}
+                 </span>
+                 <span className="date-value">
+                   {viewMode === 'daily' 
+                     ? selectedDate.toLocaleDateString('th-TH', { dateStyle: 'long' })
+                     : `${weekDays[0].toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })} - ${weekDays[6].toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                   }
                  </span>
               </div>
            </div>
-           
-           <span className="material-symbols-outlined" style={{color:'#94a3b8'}}>expand_more</span>
-
-           {/* Input จริงที่ซ่อนไว้ แต่ปุ่มกดถูกขยายเต็มพื้นที่แล้ว */}
+           <span className="material-symbols-outlined dropdown-icon">expand_more</span>
            <input 
               type="date"
               className="date-overlay"
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                opacity: 0, 
-                cursor: 'pointer',
-                zIndex: 10 /* ดันมาไว้หน้าสุดเพื่อรับการสัมผัส */
-              }}
               value={formatDateForInput(selectedDate)}
               onChange={(e) => {
                  if(e.target.value) {
@@ -201,48 +173,56 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* 4. Timeline */}
-      <div className="timeline-container">
-        {loading ? (
-           <p className="loading-text">กำลังโหลดข้อมูล...</p>
-        ) : (
+      {/* 4. Content Area (สลับระหว่าง รายวัน / รายสัปดาห์) */}
+      {loading ? (
+          <div className="loading-state">
+            <span className="material-symbols-outlined spin-icon">hourglass_empty</span>
+            <p>กำลังโหลดตารางเรียน...</p>
+          </div>
+      ) : viewMode === 'daily' ? (
+        
+        /* 🌟 ส่วนที่ 4.1: โหมดรายวัน (Daily View) */
+        <div className="timeline-container">
           <div className="timeline-grid">
             {timeSlots.map((time, index) => {
               const slotBookings = getBookingsForSlot(time);
+              const isLast = index === timeSlots.length - 1;
               
               return (
                 <div key={time} className="timeline-row">
                     <div className="time-column">
                         <span className="time-label">{time}</span>
-                        {index !== timeSlots.length - 1 && <div className="time-line line-normal"></div>}
+                        <div className="timeline-dot"></div>
+                        {!isLast && <div className="timeline-line"></div>}
                     </div>
                     
-                    <div className="content-column" style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                    {/* ข้อมูลด้านขวา */}
+                    <div className="content-column" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {slotBookings.length > 0 ? (
                             slotBookings.map((booking) => {
                                 const status = getStatus(booking);
-                                
-                                let cardClass = "card-confirmed";
-                                let badgeClass = "badge-confirmed";
+
+                                let cardClass = "card-upcoming";
+                                let badgeClass = "badge-upcoming";
                                 let icon = null;
 
                                 if (status === "IN PROGRESS") {
                                     cardClass = "card-inprogress";
                                     badgeClass = "badge-inprogress";
                                     icon = <span className="material-symbols-outlined icon-pulse">sensors</span>;
-                                } else if (status === "UPCOMING") {
-                                    cardClass = "card-upcoming";
-                                    badgeClass = "badge-upcoming";
                                 }
 
+                                {/* 🌟 กลับมาแสดงการ์ดเต็มๆ แบบเดิมในทุกๆ ชั่วโมงที่มีการจอง */}
                                 return (
-                                    <div key={booking.id} className={cardClass}>
+                                    <div key={`${booking.id}-${time}`} className={`booking-card ${cardClass}`}>
                                         <div className="card-header">
-                                            <span className={badgeClass}>{status}</span>
+                                            <span className={`status-badge ${badgeClass}`}>{status}</span>
                                             {icon}
                                         </div>
-                                        <h4>{booking.title || "จองห้องเรียน"}</h4>
-                                        <div className={status === "UPCOMING" ? "card-footer-dark" : "card-footer"}>
+                                        <h4 className="booking-title" style={{textTransform: 'capitalize'}}>
+                                          {booking.title || "จองห้องเรียน"}
+                                        </h4>
+                                        <div className="booking-details">
                                             <span className="material-symbols-outlined">schedule</span> 
                                             {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                                             <span className="dot-separator">•</span>
@@ -255,18 +235,16 @@ export default function SchedulePage() {
                         ) : (
                             time === '12:00' ? (
                                 <div className="card-break">
+                                    <span className="material-symbols-outlined">restaurant</span>
                                     <span>พักเที่ยง (Lunch Break)</span>
                                 </div>
                             ) : (
-                                // ✅ แก้ตรงนี้: ส่งวันที่ (date) ไปด้วย
-                                <div 
-                                  className="card-empty" 
-                                  onClick={() => {
+                                <div className="card-empty" onClick={() => {
                                     const dateStr = formatDateForInput(selectedDate);
                                     router.push(`/search?autoTime=${time}&date=${dateStr}`);
-                                  }}
-                                >
-                                    <span>+ จองช่วงเวลานี้</span>
+                                  }}>
+                                    <span className="material-symbols-outlined">add_circle</span>
+                                    <span>จองช่วงเวลานี้</span>
                                  </div>
                             )
                         )}
@@ -275,17 +253,59 @@ export default function SchedulePage() {
               )
             })}
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* ✅ ปุ่มบวก: ก็ส่งวันที่ไปด้วย */}
-      <button 
-        className="fab-add" 
-        onClick={() => {
+      ) : (
+
+        /* 🌟 ส่วนที่ 4.2: โหมดรายสัปดาห์ (Weekly View) */
+        <div className="weekly-container">
+          {weekDays.map(day => {
+            const dayBookings = getBookingsForDate(day);
+            const isToday = day.toDateString() === new Date().toDateString();
+
+            return (
+              <div key={day.toISOString()} className={`weekly-day-card ${isToday ? 'is-today-card' : ''}`}>
+                <div className={`weekly-day-header ${isToday ? 'bg-primary' : ''}`}>
+                  <span>{day.toLocaleDateString('th-TH', { weekday: 'long' })}</span>
+                  <span>{day.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}</span>
+                </div>
+                
+                <div className="weekly-day-body">
+                  {dayBookings.length > 0 ? (
+                    dayBookings.map(b => (
+                      <div key={b.id} className="weekly-booking-item">
+                        <div className="weekly-time">
+                          {formatTime(b.start_time)}<br/>
+                          <span style={{color: 'var(--text-gray)', fontWeight: 500}}>{formatTime(b.end_time)}</span>
+                        </div>
+                        <div className="weekly-info">
+                          <h4 style={{textTransform: 'capitalize'}}>{b.title || 'จองห้องเรียน'}</h4>
+                          <p>
+                            <span className="material-symbols-outlined">location_on</span> 
+                            {b.rooms?.name || "ไม่ระบุห้อง"}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="weekly-empty">
+                      <span className="material-symbols-outlined">event_busy</span>
+                      ไม่มีตารางในวันนี้
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+      )}
+
+      {/* FAB Button */}
+      <button className="fab-add" onClick={() => {
            const dateStr = formatDateForInput(selectedDate);
            router.push(`/search?date=${dateStr}`);
-        }}
-      >
+      }}>
         <span className="material-symbols-outlined">add</span>
       </button>
 

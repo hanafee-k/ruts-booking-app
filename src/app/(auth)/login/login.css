@@ -1,8 +1,7 @@
 /* ===========================
-   LOGIN PAGE STYLES
+   LOGIN PAGE STYLES (PREMIUM)
    =========================== */
 
-/* Container */
 .login-container {
   position: relative;
   display: flex;
@@ -10,32 +9,33 @@
   width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
+  background-color: #f8fafc;
 }
 
-/* Hero Section */
+/* ================= HERO SECTION ================= */
 .login-hero {
   position: relative;
   width: 100%;
   height: 45vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start; /* 🌟 1. เปลี่ยนจาก space-between เป็น flex-start เพื่อดึงทุกอย่างขึ้นไปชิดด้านบน */
   overflow: hidden;
-  border-radius: 0 0 2.5rem 2.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 2rem 2rem;
+  box-shadow: 0 10px 30px rgba(0, 40, 85, 0.15);
 }
 
 .hero-gradient {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(135deg, var(--ruts-navy) 0%, #003380 100%);
+  background: linear-gradient(135deg, var(--ruts-navy) 0%, #001529 100%);
 }
 
 .hero-pattern {
   position: absolute;
   inset: 0;
-  opacity: 0.1;
+  opacity: 0.05;
   background-image: radial-gradient(#ffffff 1px, transparent 1px);
   background-size: 24px 24px;
 }
@@ -44,8 +44,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  mix-blend-mode: overlay;
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 .hero-bg {
@@ -54,57 +53,55 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  filter: grayscale(100%);
-  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA-R12jzgA_J83M0r6nYz7VAVF9Sxt4eCDDqe4L32gCVE9UAPTRwZLOqfjOZCJ0RzMYdgvaE-gnz7f1zfClNik8olB-UHC7QNxmsrMvX9nqb1Trc7vSEkUNQTpbsDsJ7e81maf-JmaxQPvXF5zZyRNZqY3W74_5U_r36tKtXebEOLK8LuLdqALsnB7-ujoC16zFnW60E5msh2kilqtvEOS4oN7wxftMLhYgsUS_MATfxKUqdb96UbDWpfCpxPZ91WGR0hR-rVGyI_M");
+  mix-blend-mode: overlay;
 }
 
 .hero-glow {
   position: absolute;
-  top: -5rem;
-  right: -5rem;
-  width: 16rem;
-  height: 16rem;
+  bottom: -5rem;
+  left: -5rem;
+  width: 20rem;
+  height: 20rem;
   background: var(--ruts-gold);
-  border-radius: 9999px;
-  filter: blur(80px);
-  opacity: 0.2;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.15;
 }
 
-/* Hero Header */
 .hero-header {
   position: relative;
   z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 1.5rem;
-  padding-top: 3rem;
 }
 
 .btn-back {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
 .btn-back:hover {
   background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-4px);
 }
 
-/* Hero Content */
 .hero-content {
   position: relative;
   z-index: 10;
-  padding: 0 2rem 3rem 2rem;
+  padding: 1rem 2rem 0 2rem; 
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  text-align: center;  
 }
 
 .hero-badge {
@@ -112,104 +109,114 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  background: rgba(251, 175, 24, 0.2);
+  background: rgba(255, 184, 28, 0.15);
   backdrop-filter: blur(8px);
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(251, 175, 24, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 184, 28, 0.3);
 }
 
 .hero-badge .material-symbols-outlined {
   color: var(--ruts-gold);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .hero-badge span:last-child {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--ruts-gold);
+  letter-spacing: 0.5px;
 }
 
 .hero-title {
-  font-size: 1.875rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
   color: white;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.25rem;
 }
 
 .hero-subtitle {
-  font-size: 1rem;
-  font-weight: 500;
-  color: rgb(191, 219, 254);
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-/* Form Wrapper */
+/* ================= FORM SECTION ================= */
+
+/* 🌟 Animation ลอยขึ้นมาแบบนุ่มนวล */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .login-form-wrapper {
   flex: 1;
-  padding: 0 1.5rem 2rem 1.5rem;
-  margin-top: -2rem;
+  padding: 0 16px;
+  margin-top: -3rem; /* ซ้อนทับ Hero */
   position: relative;
   z-index: 20;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .login-form-card {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
   background: white;
-  padding: 1.5rem;
-  border-radius: 2rem;
+  padding: 24px;
+  border-radius: 24px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgb(243, 244, 246);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  margin-bottom: 2rem;
 }
 
-/* Form */
+.form-header-mobile {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.form-header-mobile h2 {
+  font-size: 1.5rem;
+  color: var(--ruts-navy);
+  margin-bottom: 4px;
+}
+.form-header-mobile p {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 20px;
 }
 
-/* Error Message */
 .error-message {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  background: rgb(254, 242, 242);
-  border: 1px solid rgb(252, 165, 165);
-  border-radius: 0.75rem;
-  color: rgb(153, 27, 27);
-  font-size: 0.875rem;
-  font-weight: 500;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: slideUpFade 0.3s ease;
 }
 
-.error-message .material-symbols-outlined {
-  font-size: 20px;
-  color: rgb(239, 68, 68);
-}
-
-/* Form Group */
+/* Form Inputs */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .form-label {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: var(--ruts-navy);
-  margin-left: 0.25rem;
+  color: var(--text-main);
+  padding-left: 4px;
 }
 
-/* Input Wrapper */
 .form-input-wrapper {
   position: relative;
   display: flex;
@@ -220,237 +227,210 @@
 .input-icon {
   position: absolute;
   left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
   color: #94a3b8;
-  font-size: 22px;
+  font-size: 20px;
+  transition: color 0.3s;
   pointer-events: none;
-  z-index: 10;
 }
 
 .form-input-wrapper:focus-within .input-icon {
-  color: var(--ruts-gold);
+  color: var(--ruts-gold); /* ไอคอนเปลี่ยนสีตอนพิมพ์ */
 }
 
 .form-input {
-  display: flex;
   width: 100%;
-  min-width: 0;
-  flex: 1;
-  resize: none;
-  overflow: hidden;
-  border-radius: 0.75rem;
-  background: rgb(249, 250, 251);
-  border: 1px solid rgb(229, 231, 235);
-  color: #111318;
-  height: 3.5rem;
-  padding-left: 54px !important;
-  padding-right: 1rem;
-  font-size: 1rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s;
+  height: 52px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding-left: 48px !important;
+  padding-right: 16px;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: all 0.3s ease;
 }
 
 .form-input:focus {
-  outline: 0;
-  border-color: var(--ruts-navy);
-  box-shadow: 0 0 0 4px rgba(0, 31, 91, 0.1);
+  background: white;
+  border-color: var(--ruts-gold);
+  box-shadow: 0 0 0 4px rgba(255, 184, 28, 0.15); /* แสงเงาสีทองรอบกรอบ */
 }
 
-.form-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.form-input::placeholder {
-  color: rgb(156, 163, 175);
-}
-
-/* Password Toggle */
 .toggle-password {
   position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgb(156, 163, 175);
-  background: transparent;
-  border: none;
-  cursor: pointer;
+  right: 12px;
+  color: #94a3b8;
+  padding: 4px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem;
   transition: color 0.2s;
-  z-index: 20;
 }
-
-.toggle-password:hover {
-  color: var(--ruts-navy);
-}
-
-/* Forgot Password */
-.forgot-password-wrapper {
-  display: flex;
-  justify-content: flex-end;
-}
+.toggle-password:hover { color: var(--ruts-navy); }
 
 .forgot-password-link {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgb(107, 114, 128);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.forgot-password-link:hover {
+  font-size: 0.8rem;
+  font-weight: 600;
   color: var(--ruts-navy);
+  opacity: 0.8;
+  transition: opacity 0.2s;
 }
+.forgot-password-link:hover { opacity: 1; }
 
-/* Login Button */
+/* Buttons */
 .btn-login {
   width: 100%;
-  background: var(--ruts-navy);
+  height: 52px;
+  background: linear-gradient(135deg, var(--ruts-navy) 0%, #001f42 100%);
   color: white;
+  font-size: 1rem;
   font-weight: 700;
-  height: 3.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 12px rgba(0, 31, 91, 0.2);
-  border: none;
-  cursor: pointer;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(0, 40, 85, 0.2);
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  transition: all 0.2s;
+  margin-top: 8px;
 }
 
 .btn-login:hover {
-  background: rgb(30, 58, 138);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(0, 40, 85, 0.3);
 }
-
-.btn-login:active {
-  transform: scale(0.98);
-}
-
-.btn-login:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.btn-login:active { transform: translateY(0); }
 
 .btn-shine {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transform: translateX(-100%);
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: skewX(-20deg);
+  transition: 0.5s;
 }
-
 .btn-login:hover .btn-shine {
-  animation: shine 0.7s;
-}
-
-@keyframes shine {
-  to {
-    transform: translateX(100%);
-  }
-}
-
-.btn-login span:last-child {
-  font-size: 20px;
-  transition: transform 0.2s;
-}
-
-.btn-login:hover span:last-child {
-  transform: translateX(0.25rem);
+  left: 150%;
+  transition: 0.7s ease-in-out;
 }
 
 /* Divider */
 .divider {
   position: relative;
-  padding: 0.5rem 0;
+  text-align: center;
+  margin: 8px 0;
 }
-
 .divider-line {
   position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
+  top: 50%; width: 100%; height: 1px;
+  background: #e2e8f0;
+  z-index: 1;
 }
-
-.divider-line::before {
-  content: "";
-  width: 100%;
-  border-top: 1px solid rgb(229, 231, 235);
-}
-
 .divider-text {
   position: relative;
-  display: flex;
-  justify-content: center;
-  font-size: 0.875rem;
-  padding: 0 1rem;
+  z-index: 2;
   background: white;
-  color: rgb(156, 163, 175);
+  padding: 0 16px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-/* Register Button */
+/* Register */
 .btn-register {
   width: 100%;
+  height: 52px;
   background: white;
-  border: 2px solid var(--ruts-gold);
-  color: var(--ruts-navy);
+  border: 2px solid #e2e8f0;
+  color: var(--text-main);
   font-weight: 700;
-  height: 3.5rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
+  gap: 8px;
+  transition: all 0.3s ease;
 }
-
 .btn-register:hover {
-  box-shadow: 0 4px 14px 0 rgba(251, 175, 24, 0.39);
+  border-color: var(--ruts-gold);
+  color: var(--ruts-navy);
+  background: rgba(255, 184, 28, 0.05);
 }
+.btn-register .material-symbols-outlined { color: var(--ruts-gold); }
 
-.btn-register:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-register .material-symbols-outlined {
-  color: var(--ruts-gold);
-  transition: transform 0.2s;
-}
-
-.btn-register:hover .material-symbols-outlined {
-  transform: scale(1.1);
-}
-
-/* Footer */
 .login-footer {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
   text-align: center;
-}
-
-.login-footer p {
+  margin-top: 32px;
+  color: #94a3b8;
   font-size: 0.75rem;
-  color: rgb(156, 163, 175);
-  font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* Responsive */
+/* ========================================
+   💻 DESKTOP SPLIT SCREEN (คอมพิวเตอร์)
+   ======================================== */
 @media (min-width: 768px) {
-  .login-form-wrapper {
-    max-width: 28rem;
-    margin-left: auto;
-    margin-right: auto;
+  .login-container {
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
   }
+
+  .login-hero {
+    width: 55%;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+  }
+
+/* (หาโค้ดส่วนนี้ในหมวด 768px แล้ววางทับครับ) */
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start; /* 🌟 สั่งให้จอคอมกลับมาชิดซ้ายเหมือนเดิม */
+    text-align: left;        /* 🌟 สั่งให้จอคอมข้อความชิดซ้าย */
+    height: 100%;
+    padding: 0 10%;
+    margin-top: -80px;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  .hero-subtitle { font-size: 1.2rem; }
+
+  /* ฝั่งฟอร์ม */
+  .login-form-wrapper {
+    width: 45%;
+    margin-top: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    overflow-y: auto;
+  }
+
+  .login-form-card {
+    width: 100%;
+    max-width: 440px; /* จำกัดความกว้างฟอร์มไม่ให้ยืดเกินไป */
+    padding: 2rem;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+    margin-bottom: 0;
+  }
+
+  .form-header-mobile h2 { font-size: 2rem; }
+  .divider-text { background: white; }
+}
+
+@media (min-width: 1200px) {
+  .login-hero { width: 60%; }
+  .login-form-wrapper { width: 40%; }
+  .hero-title { font-size: 4rem; }
 }

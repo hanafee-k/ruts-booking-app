@@ -378,3 +378,100 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+
+/* ========================================
+   💻 ปรับ Layout หน้า Dashboard สำหรับจอคอม (Desktop View)
+   ======================================== */
+
+/* โหมดมือถือ: ให้ระยะห่างพอดีๆ */
+.desktop-dashboard-grid {
+  display: flex;
+  flex-direction: column;
+}
+.quick-actions-section {
+  padding: 0 16px;
+  margin-top: 24px;
+}
+.upcoming-section {
+  padding: 0 16px;
+  margin-top: 24px;
+  margin-bottom: 100px; /* เว้นที่ให้ Bottom Nav บนมือถือ */
+}
+
+/* 🌟 เมื่อหน้าจอกว้างขึ้น (แท็บเล็ต / คอมพิวเตอร์) */
+@media (min-width: 768px) {
+  /* ปรับ Header ให้มีขอบซ้ายขวา ไม่อึดอัด */
+  .dash-header {
+    padding: 24px 40px;
+  }
+
+  /* 🌟 พระเอกของเรา: แบ่ง 2 คอลัมน์ (ซ้าย 55% / ขวา 45%) */
+  .desktop-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr; 
+    gap: 32px;
+    padding: 0 40px 40px;
+    align-items: start; /* ป้องกันไม่ให้กล่องยืดความสูงตามกัน */
+  }
+
+  /* จัดกรอบต่างๆ ให้สวยขึ้นบนจอคอม */
+  .profile-section {
+    margin-top: 0;
+    border-radius: 20px;
+  }
+  
+  .agenda-card {
+    border-radius: 20px;
+    transition: transform 0.3s;
+  }
+  .agenda-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 40, 85, 0.1);
+  }
+  
+  /* รูปภาพกำหนดการ ยืดความสูงให้สวยสมส่วนบนคอม */
+  .agenda-image {
+    height: 280px; 
+  }
+
+  /* ลบ Padding/Margin เดิมของมือถือทิ้งให้หมด */
+  .quick-actions-section {
+    padding: 0;
+    margin-top: 0;
+  }
+  .upcoming-section {
+    padding: 0;
+    margin-top: 32px;
+    margin-bottom: 0; /* บนคอมไม่ต้องเว้น Bottom Nav แล้ว */
+  }
+
+  /* เมนูลัดเรียง 4 กล่อง (2x2 หรือ 1x4 แล้วแต่ขนาดจอ) */
+  .quick-actions-grid {
+    gap: 16px;
+  }
+  .qa-item {
+    transition: transform 0.2s;
+  }
+  .qa-item:hover {
+    transform: translateY(-4px);
+  }
+  .qa-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px; /* ให้ปุ่มเหลี่ยมมนขึ้นบนคอม */
+  }
+  .qa-btn .material-symbols-outlined {
+    font-size: 28px;
+  }
+  
+  .booking-item {
+    border-radius: 16px;
+    transition: all 0.2s;
+  }
+  .booking-item:hover {
+    background: var(--white);
+    border-color: var(--ruts-gold);
+    box-shadow: 0 4px 15px rgba(255, 184, 28, 0.1);
+  }
+}

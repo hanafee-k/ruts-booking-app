@@ -33,6 +33,9 @@ export default function AdminDashboard() {
     end: ""
   });
 
+  // 🌟 State สำหรับ Filter ห้องยอดฮิต
+  const [topRoomFilter, setTopRoomFilter] = useState("month"); // 'month' | 'all'
+
   // Modal Export State
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportDate, setExportDate] = useState({ start: "", end: "" });
@@ -71,7 +74,7 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // 📊 Logic สร้างข้อมูลกราฟ
+  // 📊 Logic สร้างข้อมูลกราฟเส้น
   const graphData = useMemo(() => {
     if (allBookings.length === 0) return [];
 
@@ -104,6 +107,45 @@ export default function AdminDashboard() {
 
   }, [allBookings, graphFilter]);
 
+  // 🌟 Logic คำนวณ "ห้องยอดฮิต"
+  const topRoomsData = useMemo(() => {
+    if (allBookings.length === 0) return [];
+
+    let filtered = allBookings;
+    
+    // กรองตามเดือนนี้ (ถ้าเลือก Filter 'month')
+    if (topRoomFilter === 'month') {
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      filtered = allBookings.filter(b => {
+        const d = new Date(b.start_time);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      });
+    }
+
+    // นับจำนวนการจองแต่ละห้อง
+    const roomMap = new Map();
+    filtered.forEach(b => {
+      if (b.status === 'cancelled') return; // ไม่นับคิวที่ยกเลิก
+      const roomName = b.rooms?.name || "ไม่ระบุห้อง";
+      roomMap.set(roomName, (roomMap.get(roomName) || 0) + 1);
+    });
+
+    // เรียงลำดับจากมากไปน้อย และดึงมาแค่ 5 อันดับแรก
+    const sorted = Array.from(roomMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // หาค่ามากสุดเพื่อเอาไปทำ % ความยาวของหลอดกราฟ
+    const maxCount = sorted.length > 0 ? sorted[0].count : 1;
+
+    return sorted.map(item => ({
+      ...item,
+      percentage: (item.count / maxCount) * 100
+    }));
+
+  }, [allBookings, topRoomFilter]);
 
   // Helper Filter Export
   const getFilteredExportData = () => {
@@ -191,12 +233,11 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ✅ SECTION กราฟ (แก้เรื่อง Width ล้นจอ) */}
+      {/* SECTION กราฟ */}
       <div className="table-card" style={{padding:'20px', marginBottom:'24px', overflow:'hidden'}}>
          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px', flexWrap:'wrap', gap:8}}>
             <h3 style={{fontSize:'1rem', fontWeight:700, color:'var(--ruts-navy)', margin:0}}>สถิติการใช้งาน</h3>
             
-            {/* ช่องเลือกวันที่กราฟ */}
             <div style={{display:'flex', gap:6, background:'#f1f5f9', padding:4, borderRadius:8, maxWidth:'100%', overflowX:'auto'}}>
                 <input 
                     type="date" 
@@ -216,7 +257,7 @@ export default function AdminDashboard() {
             </div>
          </div>
          
-         <div style={{width: '100%', height: 200, marginLeft: -10}}> {/* ปรับ margin เพื่อชดเชย padding */}
+         <div style={{width: '100%', height: 200, marginLeft: -10}}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={graphData}>
                 <defs>
@@ -251,6 +292,68 @@ export default function AdminDashboard() {
          </div>
       </div>
 
+      {/* 🌟 SECTION ใหม่: ห้องยอดฮิต (Leaderboard) */}
+      <div className="table-card" style={{padding:'20px', marginBottom:'24px'}}>
+         <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px'}}>
+            <h3 style={{fontSize:'1rem', fontWeight:700, color:'var(--ruts-navy)', margin:0}}>
+               <span className="material-symbols-outlined" style={{fontSize: 20, verticalAlign: 'middle', marginRight: 6, color: 'var(--orange)'}}>emoji_events</span>
+               ห้องที่ถูกจองมากที่สุด
+            </h3>
+            
+            {/* Dropdown เลือก เดือนนี้ vs ทั้งหมด */}
+            <select 
+              className="form-select" 
+              style={{padding:'4px 8px', width:'auto', fontSize:'0.75rem', borderRadius:'8px'}}
+              value={topRoomFilter}
+              onChange={(e) => setTopRoomFilter(e.target.value)}
+            >
+              <option value="month">เดือนนี้</option>
+              <option value="all">ทั้งหมด (All Time)</option>
+            </select>
+         </div>
+
+         <div style={{display:'flex', flexDirection:'column', gap:'16px'}}>
+           {topRoomsData.length > 0 ? (
+             topRoomsData.map((room, index) => (
+               <div key={room.name} style={{display:'flex', alignItems:'center', gap:'12px'}}>
+                  {/* กล่องตัวเลขลำดับ 1, 2, 3... */}
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                    background: index === 0 ? '#FFB81C' : index === 1 ? '#94a3b8' : index === 2 ? '#b45309' : '#f1f5f9', 
+                    color: index < 3 ? 'white' : '#64748b', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    fontSize: '0.85rem', fontWeight: 800
+                  }}>
+                    {index + 1}
+                  </div>
+                  
+                  {/* แถบกราฟแนวนอน */}
+                  <div style={{flex: 1}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '4px'}}>
+                      <span style={{fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)'}}>{room.name}</span>
+                      <span style={{fontSize: '0.8rem', fontWeight: 700, color: 'var(--ruts-navy)'}}>{room.count} ครั้ง</span>
+                    </div>
+                    <div style={{height: 8, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden'}}>
+                      <div style={{
+                        height: '100%', 
+                        background: index === 0 ? 'var(--ruts-navy)' : 'var(--blue)', 
+                        width: `${room.percentage}%`, 
+                        borderRadius: 4, 
+                        transition: 'width 0.5s ease'
+                      }}></div>
+                    </div>
+                  </div>
+               </div>
+             ))
+           ) : (
+             <div style={{textAlign: 'center', padding: '20px', color: '#94a3b8', fontSize: '0.85rem', background: '#f8fafc', borderRadius: '12px'}}>
+               <span className="material-symbols-outlined" style={{fontSize: 32, marginBottom: 8, opacity: 0.5}}>event_busy</span>
+               <br/>ไม่มีข้อมูลการจองในหมวดหมู่นี้
+             </div>
+           )}
+         </div>
+      </div>
+
       {/* Quick Actions */}
       <h3 style={{fontSize:'1rem', fontWeight:700, color:'var(--ruts-navy)', marginBottom:'12px'}}>จัดการด่วน</h3>
       <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px'}}>
@@ -274,13 +377,12 @@ export default function AdminDashboard() {
           </Link>
       </div>
 
-      {/* ✅ MODAL Export (แก้ Layout ยื่นล้นจอ) */}
+      {/* MODAL Export */}
       {showExportModal && (
         <div style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.5)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:20}}>
             <div style={{background:'white', borderRadius:16, padding:24, width:'100%', maxWidth:340, display:'flex', flexDirection:'column', gap:16, boxShadow:'0 10px 25px rgba(0,0,0,0.2)'}}>
                 <h3 style={{textAlign:'center', fontWeight:700, margin:0}}>ออกรายงาน (Export)</h3>
                 
-                {/* 📅 ปรับเป็นแนวตั้ง (Vertical Stack) เพื่อไม่ให้ล้นจอมือถือ */}
                 <div style={{display:'flex', flexDirection:'column', gap:12}}>
                     <div style={{display:'flex', flexDirection:'column', gap:4}}>
                         <label style={{fontSize:'0.8rem', color:'#64748b'}}>ตั้งแต่วันที่</label>

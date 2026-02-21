@@ -1,51 +1,35 @@
-/* ========================================
-   SCHEDULE PAGE STYLES
-   
-   📝 คำแนะนำ:
-   - Import ไฟล์นี้ใน page.tsx: import "./schedule.css"
-   - ตั้งชื่อคลาสด้วย prefix "schedule-" หรือ "timeline-" 
-   - Variables ถูกประกาศใน globals.css แล้ว
-   ======================================== */
-
-/* =====================================
-   SCHEDULE VARIABLES (เฉพาะหน้านี้)
-   ===================================== */
-
 :root {
-  --schedule-navy: #1a1e36;
-  --schedule-yellow: #f4d125;
-  --schedule-bg: #f8f8f5;
-  --schedule-text-dark: #0f172a;
-  --schedule-text-grey: #64748b;
+  --primary: #002855;
+  --primary-light: #e6efff;
+  --accent: #FFB81C;
+  --text-dark: #1e293b;
+  --text-gray: #64748b;
+  --bg-page: #F8FAFC;
+  --white: #ffffff;
 }
 
-/* =====================================
-   PAGE CONTAINER
-   ===================================== */
-
 .schedule-page {
-  background-color: var(--schedule-bg);
+  background-color: var(--bg-page);
   min-height: 100vh;
-  padding-bottom: 100px; /* เผื่อที่สำหรับ BottomNav */
+  padding-bottom: 100px;
   font-family: 'Noto Sans Thai', sans-serif;
 }
 
-/* =====================================
-   BANNER CARD (Today's Summary)
-   ===================================== */
-
 .section-container {
-  padding: 8px 16px;
+  padding: 0 16px;
+  margin-top: 16px;
 }
 
+/* --- Banner --- */
 .banner-card {
-  background-color: var(--schedule-navy);
+  background: linear-gradient(135deg, #001f42 0%, #002855 100%);
   border-radius: 16px;
   padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 12px rgba(26, 30, 54, 0.2);
+  color: white;
+  box-shadow: 0 10px 25px rgba(0, 40, 85, 0.15);
 }
 
 .banner-content {
@@ -55,370 +39,370 @@
 }
 
 .banner-icon {
-  background-color: rgba(244, 209, 37, 0.2);
-  padding: 8px;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
-  color: var(--schedule-yellow);
+  justify-content: center;
+  align-items: center;
+  color: var(--accent);
 }
 
-.banner-text h3 {
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 700;
-  margin: 0;
-}
+.banner-text h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.banner-text p { margin: 0; font-size: 0.75rem; color: #cbd5e1; }
 
-.banner-text p {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.7rem;
-  margin: 0;
-}
-
-.more-icon {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-/* =====================================
-   VIEW TOGGLE (Day/Week/Month)
-   ===================================== */
-
-.view-toggle {
-  display: flex;
-  background-color: #e2e8f0;
+/* --- View Toggle --- */
+.view-toggle-wrapper {
+  background: #e2e8f0;
   padding: 4px;
   border-radius: 12px;
-  height: 48px;
+  display: flex;
 }
 
 .toggle-btn {
   flex: 1;
+  padding: 10px;
   border: none;
   background: transparent;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  color: var(--text-gray);
   font-weight: 600;
-  color: var(--schedule-text-grey);
-  cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .toggle-btn.active {
-  background-color: var(--schedule-yellow);
-  color: #000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--accent);
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(255, 184, 28, 0.3);
 }
 
-/* =====================================
-   DATE STRIP (Horizontal Scrollable)
-   ===================================== */
-
-.date-strip-container {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding: 8px 16px;
-  margin-bottom: 8px;
-  scrollbar-width: none; /* Firefox */
-}
-
-.date-strip-container::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
-}
-
-.date-item {
-  min-width: 56px;
-  height: 80px;
+/* --- Date Picker --- */
+.date-picker-card {
+  position: relative;
+  background: var(--white);
+  border: 1px solid #f1f5f9;
   border-radius: 16px;
-  background-color: white;
-  border: 1px solid #e2e8f0;
+  padding: 12px 16px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  overflow: hidden;
+}
+
+.date-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.date-icon-box {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-light);
+  border-radius: 10px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s;
+  color: var(--primary);
 }
 
-.date-item .day-name {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #94a3b8;
-}
+.date-text { display: flex; flex-direction: column; }
+.date-label { font-size: 0.7rem; color: var(--text-gray); font-weight: 600; text-transform: uppercase; }
+.date-value { font-size: 1rem; color: var(--text-dark); font-weight: 700; }
+.dropdown-icon { color: #cbd5e1; pointer-events: none; }
+.date-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 10; cursor: pointer; }
 
-.date-item .day-number {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--schedule-text-dark);
-}
-
-.date-item.selected {
-  background-color: var(--schedule-yellow);
-  border-color: var(--schedule-yellow);
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.date-item.selected .day-name {
-  color: rgba(0, 0, 0, 0.6);
-}
-
-.active-dot {
-  width: 4px;
-  height: 4px;
-  background-color: #000;
-  border-radius: 50%;
-  margin-top: 4px;
-}
-
-/* =====================================
-   TIMELINE LAYOUT
-   ===================================== */
-
+/* --- TIMELINE (ดีไซน์ใหม่) --- */
 .timeline-container {
-  padding: 0 16px;
-}
-
-.timeline-grid {
-  display: grid;
-  grid-template-columns: 50px 1fr; /* คอลัมน์เวลา | คอลัมน์เนื้อหา */
-  gap: 10px;
+  padding: 24px 16px;
 }
 
 .timeline-row {
-  display: contents; /* ให้ลูกๆ เรียงตาม Grid หลัก */
+  display: flex;
+  min-height: 80px;
+  gap: 16px;
 }
 
-/* =====================================
-   TIME COLUMN (Left Side)
-   ===================================== */
-
+/* เสาเวลาฝั่งซ้าย */
 .time-column {
+  position: relative;
+  width: 45px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 4px;
 }
 
 .time-label {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: var(--schedule-text-grey);
-  margin-bottom: 4px;
+  color: var(--text-gray);
+  margin-top: -4px; /* ดึงขึ้นให้ตรงกับเส้นบนของ Card */
+  background: var(--bg-page);
+  padding-bottom: 8px;
+  z-index: 2;
 }
 
-.time-line {
-  width: 1px;
-  flex-grow: 1;
-  background-color: #cbd5e1;
+/* จุดกลมๆ บนเส้น Timeline */
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--white);
+  border: 3px solid #cbd5e1;
+  border-radius: 50%;
+  position: absolute;
+  top: 24px;
+  z-index: 2;
 }
 
-.time-line.line-active {
+/* เส้นตรงยาวเชื่อมเวลา */
+.timeline-line {
+  position: absolute;
+  top: 30px;
+  bottom: -24px;
   width: 2px;
-  background-color: var(--schedule-yellow);
+  background: #e2e8f0;
+  z-index: 1;
 }
 
-/* =====================================
-   CONTENT COLUMN (Right Side - Cards)
-   ===================================== */
-
+/* ฝั่งเนื้อหาฝั่งขวา */
 .content-column {
+  flex: 1;
   padding-bottom: 24px;
-}
-
-/* Empty Slot Card */
-.card-empty {
-  height: 48px;
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
   display: flex;
-  align-items: center;
-  padding: 0 16px;
-  cursor: pointer;
-  color: var(--schedule-text-grey);
-  font-size: 0.8rem;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Break Time Card */
-.card-break {
-  height: 48px;
-  border: 2px dashed #e2e8f0;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  background-color: #f1f5f9;
-  color: #94a3b8;
-  font-size: 0.8rem;
-  font-style: italic;
+/* --- Cards --- */
+.booking-card {
+  padding: 14px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
 
-/* =====================================
-   BOOKING CARDS (Confirmed/In Progress)
-   ===================================== */
+.card-upcoming {
+  background: var(--white);
+  border-left: 4px solid var(--primary);
+}
 
-.card-confirmed,
 .card-inprogress {
-  background-color: var(--schedule-navy);
-  border-radius: 12px;
-  padding: 16px;
-  border-left: 4px solid var(--schedule-yellow);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(145deg, var(--primary) 0%, #001f42 100%);
   color: white;
+  box-shadow: 0 6px 16px rgba(0, 40, 85, 0.2);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
 }
 
-/* Status Badges */
-.badge-confirmed,
-.badge-inprogress,
-.badge-upcoming {
-  font-size: 0.65rem;
+.status-badge {
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
-.badge-confirmed {
-  background-color: rgba(244, 209, 37, 0.2);
-  color: var(--schedule-yellow);
-}
+.badge-upcoming { background: var(--primary-light); color: var(--primary); }
+.badge-inprogress { background: rgba(255, 255, 255, 0.2); color: var(--accent); }
 
-.badge-inprogress {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.badge-upcoming {
-  background-color: #f1f5f9;
-  color: #64748b;
-}
-
-.card-confirmed h4,
-.card-inprogress h4,
-.card-upcoming h4 {
+.booking-title {
   margin: 0 0 6px 0;
   font-size: 1rem;
   font-weight: 700;
+  color: inherit;
 }
+.card-upcoming .booking-title { color: var(--text-dark); }
 
-/* Card Footer (Time & Location Info) */
-.card-footer,
-.card-footer-dark {
+.booking-details {
   display: flex;
   align-items: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   gap: 4px;
+  opacity: 0.8;
 }
+.booking-details span.material-symbols-outlined { font-size: 14px; }
 
-.card-footer {
-  color: #94a3b8; /* สำหรับการ์ดมืด */
+/* กล่องว่างสำหรับกดจอง */
+.card-empty {
+  height: 60px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.2s;
 }
+.card-empty:hover { background: #f8fafc; border-color: var(--primary); color: var(--primary); }
+.card-empty span.material-symbols-outlined { color: var(--accent); }
 
-.card-footer-dark {
-  color: #64748b; /* สำหรับการ์ดสว่าง */
-}
-
-.card-footer span.material-symbols-outlined,
-.card-footer-dark span.material-symbols-outlined {
-  font-size: 12px;
-}
-
-.dot-separator {
-  margin: 0 4px;
-}
-
-/* =====================================
-   UPCOMING CARD (White Background)
-   ===================================== */
-
-.card-upcoming {
-  background-color: white;
-  border-radius: 12px;
-  padding: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.card-upcoming h4 {
-  color: var(--schedule-text-dark);
-}
-
-/* =====================================
-   ICONS & ANIMATIONS
-   ===================================== */
-
-.icon-bell {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.icon-pulse {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.4);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-/* =====================================
-   FAB (Floating Action Button)
-   ===================================== */
-
-.fab-add {
-  position: fixed;
-  bottom: 100px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: var(--schedule-yellow);
-  border: none;
+/* กล่องพักเที่ยง */
+.card-break {
+  height: 60px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(244, 209, 37, 0.4);
+  gap: 8px;
+  background: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 10px, #f8fafc 10px, #f8fafc 20px);
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid #e2e8f0;
+}
+
+/* FAB Button */
+.fab-add {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--primary);
+  border: none;
+  box-shadow: 0 4px 15px rgba(255, 184, 28, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
-  z-index: 40;
   transition: transform 0.2s;
 }
+.fab-add:active { transform: scale(0.9); }
 
-.fab-add:active {
-  transform: scale(0.95);
+/* =================================================================
+   🌟 WEEKLY VIEW STYLES (ดีไซน์หน้ารายสัปดาห์)
+   ================================================================= */
+
+.weekly-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.fab-add span {
-  color: black;
+.weekly-day-card {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+
+.is-today-card {
+  border: 2px solid var(--primary);
+  box-shadow: 0 8px 25px rgba(0, 40, 85, 0.1);
+}
+
+.weekly-day-header {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weekly-day-header.bg-primary {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.weekly-day-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.weekly-booking-item {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.weekly-booking-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.weekly-time {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--primary);
+  min-width: 65px;
+  line-height: 1.4;
+}
+
+.weekly-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.weekly-info p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-gray);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.weekly-info p span.material-symbols-outlined {
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.weekly-empty {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.weekly-empty span.material-symbols-outlined {
+  font-size: 24px;
+  opacity: 0.5;
+}
+
+/* เพิ่ม Loading State ตรงกลางจอ */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: var(--text-gray);
+  gap: 12px;
+}
+
+.spin-icon {
   font-size: 32px;
+  color: var(--primary);
+  animation: spin 2s linear infinite;
 }
 
-/* =====================================
-   RESPONSIVE
-   ===================================== */
-
-@media (max-width: 640px) {
-  .top-bar {
-    padding: 12px 16px;
-  }
-
-  .banner-card {
-    padding: 12px;
-  }
-
-  .timeline-grid {
-    grid-template-columns: 45px 1fr;
-  }
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }

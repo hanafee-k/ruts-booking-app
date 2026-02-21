@@ -1,0 +1,388 @@
+/* ===========================
+   REGISTER PAGE STYLES (PREMIUM)
+   =========================== */
+
+.login-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #f8fafc;
+}
+
+/* ================= HERO SECTION ================= */
+.login-hero {
+  position: relative;
+  width: 100%;
+  height: 45vh; /* พื้นที่ Hero ลดลงนิดนึงเพราะฟอร์ม Register ยาวกว่า */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  border-radius: 0 0 2rem 2rem;
+  box-shadow: 0 10px 30px rgba(0, 40, 85, 0.15);
+}
+
+.hero-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(135deg, var(--ruts-navy) 0%, #001529 100%);
+}
+
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: radial-gradient(#ffffff 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+.hero-bg {
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  mix-blend-mode: overlay;
+  background-image: url("https://www.rmutsv.ac.th/ruts/wp-content/uploads/2023/05/bg1-Large.jpeg"); 
+}
+
+.hero-glow {
+  position: absolute;
+  bottom: -5rem;
+  left: -5rem;
+  width: 20rem;
+  height: 20rem;
+  background: var(--ruts-gold);
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.15;
+}
+
+.hero-header {
+  position: relative;
+  z-index: 10;
+  padding: 1.5rem;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-4px);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  padding: 1rem 2rem 0 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.hero-subtitle {
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ================= FORM SECTION ================= */
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-form-wrapper {
+  flex: 1;
+  padding: 0 16px;
+  margin-top: -6rem; /* ดึงฟอร์มขึ้นไปซ้อนทับภาพ Hero */
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 20;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.login-form-card {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  padding: 28px 24px;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px; /* ระยะห่างระหว่างกล่อง Input (ปรับแคบลงกว่า Login นิดนึงเพราะช่องเยอะกว่า) */
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: slideUpFade 0.3s ease;
+}
+
+/* Form Inputs */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding-left: 4px;
+}
+
+.form-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  color: #94a3b8;
+  font-size: 20px;
+  transition: color 0.3s;
+  pointer-events: none;
+}
+
+.form-input-wrapper:focus-within .input-icon {
+  color: var(--ruts-gold); 
+}
+
+.form-input {
+  width: 100%;
+  height: 50px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding-left: 48px !important;
+  padding-right: 16px;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  background: white;
+  border-color: var(--ruts-gold);
+  box-shadow: 0 0 0 4px rgba(255, 184, 28, 0.15);
+}
+
+/* Buttons */
+.btn-login {
+  width: 100%;
+  height: 52px;
+  background: linear-gradient(135deg, var(--ruts-navy) 0%, #001f42 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(0, 40, 85, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(0, 40, 85, 0.3);
+}
+.btn-login:active { transform: translateY(0); }
+
+.btn-shine {
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: skewX(-20deg);
+  transition: 0.5s;
+}
+.btn-login:hover .btn-shine {
+  left: 150%;
+  transition: 0.7s ease-in-out;
+}
+
+/* Divider */
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 12px 0 8px;
+}
+.divider-line {
+  position: absolute;
+  top: 50%; width: 100%; height: 1px;
+  background: #e2e8f0;
+  z-index: 1;
+}
+.divider-text {
+  position: relative;
+  z-index: 2;
+  background: white;
+  padding: 0 16px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Login Link Button */
+.btn-register {
+  width: 100%;
+  height: 52px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  color: var(--text-main);
+  font-weight: 700;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.btn-register:hover {
+  border-color: var(--ruts-gold);
+  color: var(--ruts-navy);
+  background: rgba(255, 184, 28, 0.05);
+}
+.btn-register .material-symbols-outlined { color: var(--ruts-gold); }
+
+.login-footer {
+  text-align: center;
+  margin-top: 32px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+
+/* ========================================
+   💻 DESKTOP SPLIT SCREEN (คอมพิวเตอร์)
+   ======================================== */
+@media (min-width: 768px) {
+  .login-container {
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .login-hero {
+    width: 55%;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+    justify-content: center; /* ให้เนื้อหาอยู่กลางจอตอนอยู่บนคอม */
+  }
+
+  .hero-content {
+    align-items: flex-start;
+    text-align: left;
+    padding: 0 10%;
+    margin-top: -80px;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  .hero-subtitle { font-size: 1.2rem; }
+
+  /* ฝั่งฟอร์ม (ปรับให้ Scroll ได้ง่าย เพราะฟอร์ม Register มักจะยาว) */
+  .login-form-wrapper {
+    width: 45%;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 2rem 0; /* เอา padding บนล่างออกนิดนึง */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    overflow-y: auto; /* สำคัญมาก: ให้ฟอร์มไถขึ้นลงได้ถ้าจอเล็ก */
+  }
+
+  /* ปรับแต่ง Scrollbar ฝั่งขวาให้ดูเนียนตา */
+  .login-form-wrapper::-webkit-scrollbar {
+    width: 6px;
+  }
+  .login-form-wrapper::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 10px;
+  }
+
+  .login-form-card {
+    width: 100%;
+    max-width: 460px; /* เพิ่มความกว้างให้ฟอร์มกรอกง่ายขึ้น */
+    padding: 2rem;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+    margin: auto 0; /* จัดให้อยู่ตรงกลางตามแนวตั้ง */
+  }
+
+  .divider-text { background: white; }
+}
+
+@media (min-width: 1200px) {
+  .login-hero { width: 60%; }
+  .login-form-wrapper { width: 40%; }
+  .hero-title { font-size: 4rem; }
+}
