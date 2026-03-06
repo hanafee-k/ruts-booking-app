@@ -354,34 +354,21 @@
    RESPONSIVE
    ===================================== */
 
-@media (max-width: 640px) {
-  .booking-page {
-    max-width: 100%;
-    border-radius: 0;
-    box-shadow: none;
-  }
-}
-
 @media (min-width: 768px) {
   /* 🌟 1. ปลดล็อคกล่องสีขาวด้านล่างให้กางเต็มจอ */
-  /* หมายเหตุ: เปลี่ยน .booking-footer เป็นชื่อ Class จริงที่คุณใช้ครอบปุ่มนี้อยู่ */
-  .booking-footer, 
-  .bottom-action-bar, 
-  .step-footer {
+  .confirm-footer {
     max-width: 100% !important; 
     width: 100%;
-    border-radius: 0; /* เอาขอบมนออกให้แนบไปกับจอ */
-    padding: 24px 40px; /* เพิ่มระยะขอบซ้ายขวาให้ดูไม่อึดอัด */
+    border-radius: 0;
+    padding: 24px 40px;
+    bottom: 80px; /* 🚨 แก้ตรงนี้! ดันขึ้นมา 80px ให้พ้นแถบเมนูด้านล่าง (ถ้ายังทับอยู่ ปรับเลข 80 เพิ่มได้ครับ) */
+    z-index: 40;
   }
 
-  /* 🌟 2. ปรับตัวเส้น Progress (ขั้นตอน 3 จาก 3) ให้ยาวเต็มพื้นที่ */
-  .step-progress-container {
-    max-width: 100%;
-  }
-
-  /* 🌟 3. ปรับปุ่มกดยืนยัน (ถ้าไม่อยากให้ปุ่มยาวเหยียดเป็นเส้นก๋วยเตี๋ยว แนะนำให้ล็อกความกว้างปุ่มไว้ตรงกลางครับ) */
-  .btn-confirm {
-    max-width: 600px; /* ไม่ให้ปุ่มยาวเกินไปบนจอคอม */
-    margin: 0 auto;   /* จัดปุ่มให้อยู่กึ่งกลาง */
+  /* 🌟 2. ปรับปุ่มกดยืนยันไม่ให้ยาวเหยียด */
+  .btn-confirm-final {
+    max-width: 600px; 
+    margin: 0 auto;   
+    display: block;
   }
 }
